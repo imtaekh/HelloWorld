@@ -29,6 +29,10 @@ copyright.innerHTML="ⓒ 2015. Ian Hong All Rights Reserved.</br>(http://blog.na
 document.body.appendChild(copyright);
 var ctx = canvas.getContext("2d");
 
+if(window.innerHeight>window.innerWidth){
+	alert("Please rotate your device to landscape mode");
+}
+
 var keystate = {};
 document.addEventListener("keydown", function(e){
 	if(inputAllowed) keystate[e.keyCode] = true;
@@ -41,18 +45,18 @@ document.addEventListener("keyup", function(e){
 var event = (navigator.platform.toString()[0]=="i") ? "touchstart" : "click";
 document.addEventListener(event,function(e){
 	if(instruction.isOn) instruction.isOn = false;
-        var x, y;
-        switch(e.type){
-                case "click":
-                x=e.pageX;
-                y=e.pageY;
-                break;
-                case "touchstart":
-                var touchobj = e.changedTouches[0]; // reference first touch point (ie: first finger)
-                x = parseInt(touchobj.pageX); // get x position of touch point relative to left edge of browser
-                y = parseInt(touchobj.pageY);
-                break;
-        }
+    var x, y;
+    switch(e.type){
+      case "click":
+      x=e.pageX;
+      y=e.pageY;
+      break;
+      case "touchstart":
+      var touchobj = e.changedTouches[0]; // reference first touch point (ie: first finger)
+      x = parseInt(touchobj.pageX); // get x position of touch point relative to left edge of browser
+      y = parseInt(touchobj.pageY);
+      break;
+    }
 	mouse.x = WIDTH * (x-canvas.offsetLeft)/(canvas.offsetWidth);
 	mouse.y = HEIGHT * (y-canvas.offsetTop)/(canvas.offsetHeight);
 	if(inputAllowed&&mouse.x<WIDTH&&mouse.x>0&&mouse.y>0&&mouse.y<HEIGHT) {
@@ -89,7 +93,14 @@ var spaceKey = {
 window.onload = function(){
 	setInterval(mainLoop, 20);
 };
+function checkWindowSize(){
+	if(parseInt(window.getComputedStyle(canvas).height)>window.innerHeight||parseInt(window.getComputedStyle(canvas).height)<HEIGHT){
+		canvas.style.height=window.innerHeight+"px";
+		canvas.style.width=window.innerHeight*WIDTH/HEIGHT+"px";
+	}
+}
 function mainLoop(){
+	checkWindowSize();
 	spaceKey.delay();
 	draw();
 	update();
@@ -548,7 +559,6 @@ Table1.prototype.update = function(){
 	this.leftChair.y=this.y;
 	this.rightChair.x=this.x+61;
 	this.rightChair.y=this.y;
-	console.log(mouse.x+" / "+this.leftChair.x);
 	if(!this.leftChair.occupied && distance(player,this.leftChair,"both")< 20 && (spaceKey.isDown()||(distance(mouse,this.leftChair,"x")<20 &&mouse.status === true))){
 		player.sitOnChair(this.x-55,player.y, "right");
 		mouse.status = false;
