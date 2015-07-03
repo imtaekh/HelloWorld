@@ -94,9 +94,15 @@ window.onload = function(){
 	setInterval(mainLoop, 20);
 };
 function checkWindowSize(){
-	if(parseInt(window.getComputedStyle(canvas).height)>window.innerHeight||parseInt(window.getComputedStyle(canvas).height)<HEIGHT){
+	if((window.innerWidth<WIDTH||window.innerHeight<HEIGHT)&&window.innerWidth/window.innerHeight>WIDTH/HEIGHT){
 		canvas.style.height=window.innerHeight+"px";
 		canvas.style.width=window.innerHeight*WIDTH/HEIGHT+"px";
+	} else if((window.innerWidth<WIDTH||window.innerHeight<HEIGHT)&&window.innerHeight/window.innerWidth>HEIGHT/WIDTH){
+		canvas.style.width=window.innerWidth+"px";
+		canvas.style.height=window.innerWidth*HEIGHT/WIDTH+"px";
+	} else {
+		canvas.style.width=WIDTH;
+		canvas.style.height=HEIGHT;
 	}
 }
 function mainLoop(){
