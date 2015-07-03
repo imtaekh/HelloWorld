@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+<style>
+body {
+  text-align: center;
+  color: white;
+  background-color: black;
+  font-family: helvetica;
+}
+input {
+  border: 0;
+  padding: 10px;
+  font-size: 18px;
+}
+input[type="submit"]{
+  background: red;
+  color: white;
+}
+p {
+  font-size: 15px;
+}
+#getYourName{
+	display:none;
+	padding-top: 150px;
+	width: 600px;
+	height: 150px;
+   	background: url("src/name_bg.png");
+ 	background-size: cover;
+  	background-position: center;
+}
+#nameInputErr{
+  color : gray;
+  display: none;
+}
+
+</style>
+	<title>HelloWorld</title>
+</head>
+<body>
+<div id="getYourName">
+<form action="getName.php" method="post">
+	<H2>Tell me your name :)</H2> 
+	<input type="text" name="yourName" value="" /> <input type="submit" name="submit" value="submit" />
+</form>
+<p id="nameInputErr"></p>
+</div>
+<script>
+	var name = "noName";
+  var passcode = 12345;
+</script>
+<script src='helloworld.js'></script>
+<script src='wam/wam.js'></script>
+</body>
+
+</html>
