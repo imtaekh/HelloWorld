@@ -1,9 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-  <meta<?php echo ($_COOKIE["yourName"])?" name='viewport' content='width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;'":""; ?>>
-  <link rel="stylesheet" href="indexStyle.css.php">
 <?php
 $msg = "";
 if(isset($_POST[loginErr])){
@@ -26,8 +20,15 @@ if($_COOKIE["yourName"]){
   $row = $result->fetch_assoc();
   $passcode = $row[passcode];
   $conn->close();
+  $jsName = $_COOKIE["yourName"];
+  $jsPasscode = $row[passcode];
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"<?php echo ($_COOKIE["yourName"])?" name='viewport' content='width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;'":""; ?>>
+  <link rel="stylesheet" href="indexStyle.css.php">
 	<title>HelloWorld</title>
 </head>
 <body>
@@ -51,11 +52,16 @@ if($_COOKIE["yourName"]){
 <p id="inputErr"><?php echo "{$msg}"?></p>
 </div>
 <script>
+var name = "<?php echo $jsName ?>";
+var passcode = "<?php echo $jsPasscode ?>";
 <?php
-if(isset($_COOKIE["yourName"])){
-	echo "var name = '{$_COOKIE["yourName"]}';";
-  echo "var passcode = {$row[passcode]};";
-}
+  if($_COOKIE["yourName"]){
+    echo 'document.querySelector("#signUpDiv").style.display = "none"';
+    echo 'document.querySelector("#loginDiv").style.display = "none"';
+  }
+  if($_POST[loginErr]){
+    echo 'document.querySelector("#inputErr").style.display = "none"';
+  }
 ?>
 </script>
 <?php

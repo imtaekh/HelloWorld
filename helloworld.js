@@ -21,6 +21,7 @@ canvas.height = HEIGHT;
 canvas.style.border = "black 1px solid";
 canvas.style.width = "100%";
 canvas.style.maxWidth = "800px";
+canvas.style.marginTop = "50px";
 document.body.appendChild(canvas);
 var copyright = document.createElement('p');
 copyright.style.color="gray";
