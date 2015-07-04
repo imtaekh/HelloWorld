@@ -1,14 +1,12 @@
 <?php
 $msg = "";
-$errType = "noErr";
 if(isset($_POST["loginErr"])){
-  $errType=$_POST["loginErr"];
-  if($errType=="wrongName"){
+  if($_POST["loginErr"]=="wrongName"){
     $msg = "Name should be 4~20 digit English alphabets/numbers.";
-  } else if($errType=="duplicatedName"){
+  } else if($_POST["loginErr"]=="duplicatedName"){
     $msg = "Someone is already using the Name, please choose a different name.";
-  } else if($errType=="wrongInfo"){
-    $msg = "wronginfo";
+  } else if($_POST["loginErr"]=="wrongInfo"){
+    $msg = "there's no matching infomation in the database";
   }
 }
 if(isset($_COOKIE["yourName"])){

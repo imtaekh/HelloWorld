@@ -16,7 +16,7 @@ $result = $conn->query($sql);
 $row = $result->fetch_assoc();
 $conn->close();
 
-if($_POST[passcode]==$row[passcode]){
+if($row[name]&&$_POST[passcode]==$row[passcode]){
     $expire = time() + (60*60*24)*365;
 	setcookie("yourName", $yourName, $expire);
 	header("Location:index.php");
