@@ -1,15 +1,17 @@
 <?php
 $msg = "";
-if(isset($_POST[loginErr])){
-  if($_POST[loginErr]=="wrongName"){
+$errType = "noErr";
+if(isset($_POST["loginErr"])){
+  $errType=$_POST["loginErr"];
+  if($errType=="wrongName"){
     $msg = "Name should be 4~20 digit English alphabets/numbers.";
-  } else if($_POST[loginErr]=="duplicatedName"){
+  } else if($errType=="duplicatedName"){
     $msg = "Someone is already using the Name, please choose a different name.";
-  } else if($_POST[loginErr]=="wrongInfo"){
+  } else if($errType=="wrongInfo"){
     $msg = "wronginfo";
   }
 }
-if($_COOKIE["yourName"]){
+if(isset($_COOKIE["yourName"])){
 	include 'acinf.php';
   $conn = new mysqli($servername, $username, $password, $dbname);
   if ($conn->connect_error) {
@@ -21,9 +23,7 @@ if($_COOKIE["yourName"]){
   $passcode = $row[passcode];
   $conn->close();
   $jsName = $_COOKIE["yourName"];
-  echo $jsName;
   $jsPasscode = $row[passcode];
-  echo $jsPasscode;
 }
 ?>
 <!DOCTYPE html>
@@ -54,22 +54,22 @@ if($_COOKIE["yourName"]){
 <p id="inputErr"><?php echo "{$msg}"?></p>
 </div>
 <script>
+<?php
+if(!isset($_POST["loginErr"])){
+  echo "document.querySelector('#inputErr').style.display = 'none';\n";
+  if(isset($_COOKIE["yourName"])){
+    echo "document.querySelector('#signUpDiv').style.display = 'none';\n";
+    echo "document.querySelector('#logInDiv').style.display = 'none';\n";
+  }
+}
+?>
 var name = "<?php echo $jsName; ?>";
 var passcode = "<?php echo $jsPasscode; ?>";
+
 </script>
 <?php
-  if($_COOKIE["yourName"]){
-    echo "catched cookie";
-    echo 'document.querySelector("#signUpDiv").style.display = "none"';
-    echo 'document.querySelector("#loginDiv").style.display = "none"';
-  }
-  if($_POST[loginErr]){
-    echo 'document.querySelector("#inputErr").style.display = "none"';
-  }
-?>
-<?php
 if(isset($_COOKIE["yourName"])){
-  echo "<script src='helloworld.js'></script>";
+  echo "<script src='helloworld.js'></script>\n";
   echo "<script src='wam/wam.js'></script>";
 }
 ?>
