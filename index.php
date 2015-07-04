@@ -21,14 +21,16 @@ if($_COOKIE["yourName"]){
   $passcode = $row[passcode];
   $conn->close();
   $jsName = $_COOKIE["yourName"];
+  echo $jsName;
   $jsPasscode = $row[passcode];
+  echo $jsPasscode;
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8"<?php echo ($_COOKIE["yourName"])?" name='viewport' content='width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;'":""; ?>>
-  <link rel="stylesheet" href="indexStyle.css.php">
+  <link rel="stylesheet" href="indexStyle.css">
 	<title>HelloWorld</title>
 </head>
 <body>
@@ -52,10 +54,12 @@ if($_COOKIE["yourName"]){
 <p id="inputErr"><?php echo "{$msg}"?></p>
 </div>
 <script>
-var name = "<?php echo $jsName ?>";
-var passcode = "<?php echo $jsPasscode ?>";
+var name = "<?php echo $jsName; ?>";
+var passcode = "<?php echo $jsPasscode; ?>";
+</script>
 <?php
   if($_COOKIE["yourName"]){
+    echo "catched cookie";
     echo 'document.querySelector("#signUpDiv").style.display = "none"';
     echo 'document.querySelector("#loginDiv").style.display = "none"';
   }
@@ -63,7 +67,6 @@ var passcode = "<?php echo $jsPasscode ?>";
     echo 'document.querySelector("#inputErr").style.display = "none"';
   }
 ?>
-</script>
 <?php
 if(isset($_COOKIE["yourName"])){
   echo "<script src='helloworld.js'></script>";
