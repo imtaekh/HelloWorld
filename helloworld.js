@@ -1,6 +1,8 @@
 var WIDTH = 600;
+var MAX_WIDTH =800;
 var WIDTH_END = 800;
 var HEIGHT = 400;
+var MAX_HEIGHT = 533;
 var KEY_UP = 38;
 var KEY_DOWN = 40;
 var KEY_RIGHT = 39;
@@ -20,7 +22,7 @@ canvas.width = WIDTH;
 canvas.height = HEIGHT;
 canvas.style.border = "black 1px solid";
 canvas.style.width = "100%";
-canvas.style.maxWidth = "800px";
+canvas.style.maxWidth = MAX_WIDTH+"px";
 canvas.style.marginTop = "50px";
 document.body.appendChild(canvas);
 var copyright = document.createElement('p');
@@ -95,15 +97,15 @@ window.onload = function(){
 	setInterval(mainLoop, 20);
 };
 function checkWindowSize(){
-	if((window.innerWidth<WIDTH||window.innerHeight<HEIGHT)&&window.innerWidth/window.innerHeight>WIDTH/HEIGHT){
+	if((window.innerWidth<MAX_WIDTH||window.innerHeight<MAX_HEIGHT)&&window.innerWidth/window.innerHeight>MAX_WIDTH/MAX_HEIGHT){
 		canvas.style.height=window.innerHeight+"px";
-		canvas.style.width=window.innerHeight*WIDTH/HEIGHT+"px";
-	} else if((window.innerWidth<WIDTH||window.innerHeight<HEIGHT)&&window.innerHeight/window.innerWidth>HEIGHT/WIDTH){
+		canvas.style.width=window.innerHeight*MAX_WIDTH/MAX_HEIGHT+"px";
+	} else if((window.innerWidth<MAX_WIDTH||window.innerHeight<MAX_HEIGHT)&&window.innerHeight/window.innerWidth>MAX_HEIGHT/MAX_WIDTH){
 		canvas.style.width=window.innerWidth+"px";
-		canvas.style.height=window.innerWidth*HEIGHT/WIDTH+"px";
+		canvas.style.height=window.innerWidth*MAX_HEIGHT/MAX_WIDTH+"px";
 	} else {
-		canvas.style.width=WIDTH;
-		canvas.style.height=HEIGHT;
+		canvas.style.width=MAX_WIDTH;
+		canvas.style.height=MAX_HEIGHT;
 	}
 }
 function mainLoop(){
@@ -434,11 +436,11 @@ Human.prototype.walk= function(toward){
 
 	switch(toward){
 		case "right":
-		player.x++;
+		player.x+=2;
 		break;
 
 		case "left":
-		player.x--;
+		player.x-=2;
 		break;
 	}
 };
