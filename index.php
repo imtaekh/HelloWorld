@@ -27,29 +27,28 @@ if(isset($_COOKIE["yourName"])){
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8"<?php echo ($_COOKIE["yourName"])?" name='viewport' content='width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;'":""; ?>>
+	<meta charset="UTF-8" name='viewport' content='width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;'>
+  <link href='http://fonts.googleapis.com/css?family=Sigmar+One' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="indexStyle.css">
 	<title>HelloWorld</title>
 </head>
 <body>
+  <h1> HelloWorld! </h1>
 <div id="signUpDiv">
-
 <form action="signUp.php" method="post">
   <H2>Tell me your name :)</H2>
   <input type="text" class="signUp" name="yourName" value="" onblur="this.value=this.value.toUpperCase()"/>
   <input type="submit" class="signUp" name="submit" value="submit" />
 </form>
+<p id="inputErr"><?php echo "{$msg}"?></p>
 </div>
 <div id="logInDiv">
 <form action="login.php" method="post">
-  <p>or log in :
+  <p>or log in :</p>
   <input type="text" class="logIn" name="yourName" placeholder="Name" onblur="this.value=this.value.toUpperCase()"/>
   <input type="text" class="logIn" name="passcode" placeholder="Passcode" onblur="this.value=this.value.toUpperCase()"/>
-  <input type="submit" class="logIn" name="submit" value="submit" /></p>
+  <input type="submit" class="logIn" name="submit" value="submit" />
 </form>
-</tr>
-</table>
-<p id="inputErr"><?php echo "{$msg}"?></p>
 </div>
 <script>
 <?php

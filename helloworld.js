@@ -23,12 +23,10 @@ canvas.height = HEIGHT;
 canvas.style.border = "black 1px solid";
 canvas.style.width = "100%";
 canvas.style.maxWidth = MAX_WIDTH+"px";
-canvas.style.marginTop = "50px";
 document.body.appendChild(canvas);
 var copyright = document.createElement('p');
-copyright.style.color="gray";
-copyright.style.margin="0px";
-copyright.innerHTML="ⓒ 2015. Ian Hong All Rights Reserved.</br>(http://blog.naver.com/azure0777)";
+copyright.style.margin="30px";
+copyright.innerHTML="ⓒ 2015. Imtaek Hong All Rights Reserved.";
 document.body.appendChild(copyright);
 var ctx = canvas.getContext("2d");
 
