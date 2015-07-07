@@ -10,6 +10,7 @@ var KEY_LEFT = 37;
 var KEY_SPACE = 32;
 var PI = Math.PI;
 var gravity = 0.25;
+var gameOn = false;
 var inputAllowed ="true";
 var offsetX = 0, offsetY = 0;
 var mouse = {
@@ -78,6 +79,13 @@ function distance(A, B, option){
 		return Math.sqrt(Math.pow((A-B),2));
 	}
 }
+function dot(x,y){
+	ctx.save();
+	ctx.beginPath();
+	ctx.arc(x, y, 1, 0, 2 * Math.PI);
+	ctx.stroke();
+	ctx.restore();
+}
 var spaceKey = {
 	COUNT_MAX: 10,
 	count: 0,
@@ -85,7 +93,7 @@ var spaceKey = {
 		if(this.count>0) this.count--;
 	},
 	isDown: function(){
-		if(this.count === 0 && keystate[KEY_SPACE]){
+		if(this.count === 0 && keystate[KEY_SPACE] && gameOn==false){
 			this.count= this.COUNT_MAX;
 			return true;
 		}
@@ -491,10 +499,10 @@ var thingObj = new Thing("src/things.png");
 var player = new Human("src/player.png",100,250,98,98,"standing","right",65);
 player.forcedWalking = false;
 player.update = function(){
-	if(keystate[KEY_RIGHT]){
+	if(keystate[KEY_RIGHT]&&gameOn==false){
 		player.walk("right");
 	}
-	if(keystate[KEY_LEFT]){
+	if(keystate[KEY_LEFT]&&gameOn==false){
 		player.walk("left");
 	}
 //*

@@ -10,6 +10,7 @@ var wam = {
 	ANI_COUNT_MAX: 20,
 	powerOn: function(){
 		this.status = true;
+		gameOn = true;
 		this.main.status = false;
 		this.menuGene("gameStart");
 		this.reset();
@@ -125,6 +126,7 @@ var wam = {
 		ctx.restore();
 	},
 	exit: function(){
+		gameOn = false;
 		this.status = false;
 	},
 	rank:{
