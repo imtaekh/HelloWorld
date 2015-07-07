@@ -147,6 +147,7 @@ function draw(){
 	photoframe03.draw();
 	girl1.draw();
 	wamGame.draw();
+	bubbleGame.draw();
 	if(mainMessage.count>0) mainMessage.draw();
 	if(offsetX>0) screenArrowLeft.draw();
 	if(WIDTH+offsetX<WIDTH_END) screenArrowRight.draw();
@@ -165,6 +166,7 @@ function update(){
 	screenArrowLeft.update();
 	screenArrowRight.update();
 	wamGame.update();
+	bubbleGame.update();
 
 	player.update();
 }

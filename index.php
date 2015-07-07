@@ -68,6 +68,7 @@ var passcode = "<?php echo $jsPasscode; ?>";
 if(isset($_COOKIE["yourName"])){
   echo "<script src='helloworld.js'></script>\n";
   echo "<script src='wam/wam.js'></script>";
+  echo "<script src='bubble/bubble.js'></script>";
 }
 ?>
 </body>
