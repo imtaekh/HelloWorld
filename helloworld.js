@@ -79,10 +79,11 @@ function distance(A, B, option){
 		return Math.sqrt(Math.pow((A-B),2));
 	}
 }
-function dot(x,y){
+function dot(x,y,color){
 	ctx.save();
 	ctx.beginPath();
-	ctx.arc(x, y, 1, 0, 2 * Math.PI);
+	ctx.arc(x, y, 2, 0, 2 * Math.PI);
+	ctx.strokeStyle=color;
 	ctx.stroke();
 	ctx.restore();
 }

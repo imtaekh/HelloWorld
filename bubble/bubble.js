@@ -8,13 +8,8 @@ var bubble={
     gameOn = true;
     this.gameMode = null;
 		this.status = true;
-//		this.main.status = false;
 		this.menuGene();
-//		this.reset();
 	},
-  reset: function(){
-
-  },
 	isRectClick: function(x,y,width,height){
 		if(this.click &&mouse.x>x && mouse.y>y && mouse.x<x+width && mouse.y<y+height){
 			this.click = false;
@@ -88,7 +83,7 @@ var bubble={
 		this.status = false;
 	},
   bubbles: {
-    numberOfColor:1, width:32, height:32,
+    numberOfColor:4, width:32, height:32,
     0:{color: 0, sx:0, sy:482, special:null},
     1:{color: 0, sx:0, sy:518, special:"bomb"},
     2:{color: 0, sx:0, sy:554, special:"colorChange"},
@@ -115,6 +110,7 @@ var bubble={
       type=0;
     } else if(randNum<0.95){
       type=1;
+      return 16;
     } else {
       type=2;
     }
@@ -132,21 +128,27 @@ var bubble={
     }
   },
   bubbleGlue: function(){
+    var numOfColumn = (this.gameMode=="battleMode")?14:undefined;
+    var bubbleData = (this.gameMode=="battleMode")?this.battle.bubbleData:undefined;
     var shortest={xPos:null, yPos:null, distance:50};
-    for(var i=0;i<this.battle.bubbleData.length;i++){
-      for(var j=0; j<14; j++){
-        if(this.battle.bubbleData[i][j].num===null){
-          if(distance(this.battle.bubbleData[i][j], this.bubbleMove, "both")<shortest.distance){
-            shortest.distance =distance(this.battle.bubbleData[i][j], this.bubbleMove, "both");
+    for(var i=0;i<bubbleData.length;i++){
+      var gapOffset=0;
+      if(bubbleData[i].isGap){
+        gapOffset=-1;
+      }
+      for(var j=0; j<numOfColumn+gapOffset; j++){
+        if(bubbleData[i][j].num===null){
+          if(distance(bubbleData[i][j], this.bubbleMove, "both")<shortest.distance){
+            shortest.distance =distance(bubbleData[i][j], this.bubbleMove, "both");
             shortest.xPos=j;
             shortest.yPos=i;
           }
         }
       }
     }
-//    dot(this.bubbleMove.x,this.bubbleMove.y);
-    dot(this.battle.bubbleData[shortest.yPos][shortest.xPos].x,this.battle.bubbleData[shortest.yPos][shortest.xPos].y);
-    this.battle.bubbleData[shortest.yPos][shortest.xPos].num = this.bubbleMove.bubbleNum;
+//    dot(this.bubbleMove.x,this.bubbleMove.y,"blue");
+    dot(bubbleData[shortest.yPos][shortest.xPos].x,bubbleData[shortest.yPos][shortest.xPos].y,"blue");
+    bubbleData[shortest.yPos][shortest.xPos].num = this.bubbleMove.bubbleNum;
     this.bubbleMove.status=false;
     this.bubbleAction(shortest.yPos,shortest.xPos);
     this.fallingCheck();
@@ -156,9 +158,9 @@ var bubble={
     var numOfColumn = (this.gameMode=="battleMode")?14:undefined;
     var bubbleData = (this.gameMode=="battleMode")?this.battle.bubbleData:undefined;
     var bubbleColor= Math.floor(bubbleData[yOrigin][xOrigin].num/3)*3;
+    var gapOffset=0;
     switch (this.bubbles[bubbleData[yOrigin][xOrigin].num].special) {
       case "colorChange":
-        var gapOffset=0;
         if (bubbleData[yOrigin].isGap){
           gapOffset = -1;
         }
@@ -170,15 +172,17 @@ var bubble={
         bubbleData[yOrigin][xOrigin].isFalling=true;
         var around=this.getAroundPosInfo(yOrigin,xOrigin);
         for(var i =0; i<6; i++){
-          var gapOffset=0;
           if(around[i].y >=0 && around[i].y < 14 ){
             if (bubbleData[around[i].y].isGap){
               gapOffset= -1;
             }
             if(around[i].x >=0 && around[i].x < numOfColumn+gapOffset){
-              bubbleData[around[i].y][around[i].x].num =15;
-              bubbleData[around[i].y][around[i].x].isFalling = true;
+              if(bubbleData[around[i].y][around[i].x].num!== null){
+                bubbleData[around[i].y][around[i].x].num =15;
+                bubbleData[around[i].y][around[i].x].isFalling = true;
+              }
             }
+            this.fallingProvoke();
           }
         }
         break;
@@ -208,7 +212,6 @@ var bubble={
     return around;
   },
   bubbleCheck:function(yOrigin,xOrigin){
-
     var numOfColumn = (this.gameMode=="battleMode")?14:undefined;
     var bubbleData = (this.gameMode=="battleMode")?this.battle.bubbleData:undefined;
     bubbleData[yOrigin][xOrigin].isFalling=true;
@@ -221,10 +224,30 @@ var bubble={
           gapOffset= -1;
         }
         if(around[i].x >=0 && around[i].x < numOfColumn+gapOffset){
-          dot(bubbleData[around[i].y][around[i].x].x,bubbleData[around[i].y][around[i].x].y);
-          if(bubbleData[around[i].y][around[i].x].num==bubbleData[yOrigin][xOrigin].num && bubbleData[around[i].y][around[i].x].isFalling == false){
+          dot(bubbleData[around[i].y][around[i].x].x,bubbleData[around[i].y][around[i].x].y,"yellow");
+          if(bubbleData[around[i].y][around[i].x].num==bubbleData[yOrigin][xOrigin].num && bubbleData[around[i].y][around[i].x].isFalling === false){
             this.bubbleCheck(around[i].y,around[i].x);
           }
+        }
+      }
+    }
+  },
+  fallingProvoke: function(){
+    var numOfColumn = (this.gameMode=="battleMode")?14:undefined;
+    var bubbleData = (this.gameMode=="battleMode")?this.battle.bubbleData:undefined;
+    for(i=0;i<bubbleData.length;i++){
+      var gapOffset=0;
+      if (bubbleData[i].isGap){
+        gapOffset= -1;
+      }
+      for(var j=0; j<numOfColumn+gapOffset; j++){
+
+        if(bubbleData[i][j].num !== null && bubbleData[i][j].isFalling === true){
+
+
+          this.bubbleFallingGene(bubbleData[i][j].y,bubbleData[i][j].x,bubbleData[i][j].num);
+          bubbleData[i][j].num = null;
+          bubbleData[i][j].isFalling = false;
         }
       }
     }
@@ -245,21 +268,9 @@ var bubble={
         }
       }
     }
-
     if(count>3){
-      for(var i=0;i<bubbleData.length;i++){
-        var gapOffset=0;
-        if (bubbleData[i].isGap){
-          gapOffset= -1;
-        }
-        for(var j=0; j<numOfColumn+gapOffset; j++){
-          if(bubbleData[i][j].num !== null && bubbleData[i][j].isFalling === true){
-            this.bubbleFallingGene(bubbleData[i][j].y,bubbleData[i][j].x,bubbleData[i][j].num);
-            bubbleData[i][j].num = null;
-            bubbleData[i][j].isFalling = false;
-          }
-        }
-      }
+      this.fallingProvoke();
+      this.unattachedCheck();
     } else {
       for(var i=0;i<bubbleData.length;i++){
         var gapOffset=0;
@@ -269,6 +280,48 @@ var bubble={
         for(var j=0; j<numOfColumn+gapOffset; j++){
           if(bubbleData[i][j].num !== null && bubbleData[i][j].isFalling === true){
             bubbleData[i][j].isFalling = false;
+          }
+        }
+      }
+    }
+  },
+  unattachedCheck: function(){
+    var numOfColumn = (this.gameMode=="battleMode")?14:undefined;
+    var bubbleData = (this.gameMode=="battleMode")?this.battle.bubbleData:undefined;
+
+    for(var i=0;i<bubbleData.length;i++){
+      var gapOffset=0;
+      if (bubbleData[i].isGap){
+        gapOffset= -1;
+      }
+      for(var j=0; j<numOfColumn+gapOffset; j++){
+        if(bubbleData[i][j].num !== null && bubbleData[i][j].isFalling === false){
+           bubbleData[i][j].isFalling=true;
+        }
+      }
+    }
+    for(var j=0; j<numOfColumn+gapOffset; j++){
+      if(bubbleData[0][j].num !== null && bubbleData[0][j].isFalling === true){
+        this.unattachedCheckRecursive(0,j);
+      }
+    }
+    this.fallingProvoke();
+  },
+  unattachedCheckRecursive: function(yOrigin,xOrigin){
+    var numOfColumn = (this.gameMode=="battleMode")?14:undefined;
+    var bubbleData = (this.gameMode=="battleMode")?this.battle.bubbleData:undefined;
+    bubbleData[yOrigin][xOrigin].isFalling=false;
+    var around=this.getAroundPosInfo(yOrigin,xOrigin);
+
+    for(var i =0; i<6; i++){
+      var gapOffset=0;
+      if(around[i].y >=0 && around[i].y < 14 ){
+        if (bubbleData[around[i].y].isGap){
+          gapOffset= -1;
+        }
+        if(around[i].x >=0 && around[i].x < numOfColumn+gapOffset){
+          if(bubbleData[around[i].y][around[i].x].num !==null && bubbleData[around[i].y][around[i].x].isFalling === true){
+            this.unattachedCheckRecursive(around[i].y,around[i].x);
           }
         }
       }
@@ -343,9 +396,13 @@ var bubble={
       this.bubbleMove.xVelocity*=(-1);
     }
     for(var i=0;i<this.battle.bubbleData.length;i++){
-      for(var j=0; j<14; j++){
+      var gapOffset=0;
+      if(this.battle.bubbleData[i].isGap){
+        gapOffset=-1;
+      }
+      for(var j=0; j<14+gapOffset; j++){
         if(this.battle.bubbleData[i][j].num!==null){
-          if(distance(this.battle.bubbleData[i][j], this.bubbleMove, "both")<=33){
+          if(distance(this.battle.bubbleData[i][j], this.bubbleMove, "both")<=30){
             this.bubbleGlue();
             return;
           }
@@ -362,7 +419,6 @@ var bubble={
   bubbleMoveDraw: function(){
     ctx.drawImage(this.spriteSheet, this.bubbles[this.bubbleMove.bubbleNum].sx, this.bubbles[this.bubbleMove.bubbleNum].sy, this.bubbles.width, this.bubbles.height, this.bubbleMove.x-16, this.bubbleMove.y-16, this.bubbles.width, this.bubbles.height);
   },
-
   battle: {
     status:false,
     background: {
@@ -405,10 +461,12 @@ var bubble={
     this.battle.bubbleData=new Array(12);
     for(var i=0;i<this.battle.bubbleData.length;i++){
       this.battle.bubbleData[i]={};
-      if(i%2==0){
+      var gapOffset=0;
+      if(i%2 === 0){
         this.battle.bubbleData[i].isGap=false;
       } else {
         this.battle.bubbleData[i].isGap=true;
+        gapOffset=-1;
       }
       var x=76+16;
       var y=15+16;
@@ -416,23 +474,39 @@ var bubble={
       if(this.battle.bubbleData[i].isGap){
         gap=16;
       }
-      for(var j=0; j<14; j++){
-        this.battle.bubbleData[i][j]={};
-        this.battle.bubbleData[i][j].num=null;
-        this.battle.bubbleData[i][j].isFalling=false;
-        this.battle.bubbleData[i][j].x=x+gap+j*32;
-        this.battle.bubbleData[i][j].y=y+i*28;
+      if(i<5){
+        for(var j=0; j<14+gapOffset; j++){
+          this.battle.bubbleData[i][j]={};
+          this.battle.bubbleData[i][j].num=Math.floor(Math.random()*this.bubbles.numberOfColor)*3;
+          this.battle.bubbleData[i][j].isFalling=false;
+          this.battle.bubbleData[i][j].x=x+gap+j*32;
+          this.battle.bubbleData[i][j].y=y+i*28;
+        }
+      } else{
+        for(var j=0; j<14; j++){
+          this.battle.bubbleData[i][j]={};
+          this.battle.bubbleData[i][j].num=null;
+          this.battle.bubbleData[i][j].isFalling=false;
+          this.battle.bubbleData[i][j].x=x+gap+j*32;
+          this.battle.bubbleData[i][j].y=y+i*28;
+        }
       }
     }
   },
   battleDraw: function(){
-    //black background &gamebBackground
+    //black background & gamebBackground
     ctx.fillStyle = "rgba(0,0,0,0.7)";
     ctx.fillRect(0,0,WIDTH,HEIGHT);
     ctx.drawImage(this.backgroundSheet, this.battle.background[this.battle.background.num].sx, this.battle.background[this.battle.background.num].sy, this.battle.background[this.battle.background.num].width, this.battle.background[this.battle.background.num].height, this.battle.background[this.battle.background.num].x, this.battle.background[this.battle.background.num].y, this.battle.background[this.battle.background.num].width*2, this.battle.background[this.battle.background.num].height*2);
+    ctx.drawImage(this.spriteSheet, 474, 96, 2, 370, 315, 15, 2, 370);
+    ctx.drawImage(this.spriteSheet, 478, 96, 2, 370, 283, 15, 2, 370);
     //gameBubbles
     for(var i=0;i<this.battle.bubbleData.length;i++){
-      for(var j=0; j<14; j++){
+      var gapOffset=0;
+      if(this.battle.bubbleData[i].isGap){
+        gapOffset=-1;
+      }
+      for(var j=0; j<14+gapOffset; j++){
         if(this.battle.bubbleData[i][j].num!==null){
           ctx.drawImage(this.spriteSheet, this.bubbles[this.battle.bubbleData[i][j].num].sx, this.bubbles[this.battle.bubbleData[i][j].num].sy, this.bubbles.width, this.bubbles.height, this.battle.bubbleData[i][j].x-16, this.battle.bubbleData[i][j].y-16, this.bubbles.width, this.bubbles.height);
         }
@@ -487,7 +561,7 @@ var bubble={
       this.battle.clickCount=20;
       this.battle.clickSpeed++;
     }
-    if(this.bubbleMove.status==false &&(keystate[KEY_SPACE]|| this.isRectClick(this.battle.player[this.battle.whoseTurn].buttonShoot.x,this.battle.player[this.battle.whoseTurn].buttonShoot.y,this.battle.player[this.battle.whoseTurn].buttonShoot.width,this.battle.player[this.battle.whoseTurn].buttonShoot.height))){
+    if(this.bubbleMove.status===false &&(keystate[KEY_SPACE]|| this.isRectClick(this.battle.player[this.battle.whoseTurn].buttonShoot.x,this.battle.player[this.battle.whoseTurn].buttonShoot.y,this.battle.player[this.battle.whoseTurn].buttonShoot.width,this.battle.player[this.battle.whoseTurn].buttonShoot.height))){
       console.log("buttonShoot");
       this.battle.player[this.battle.whoseTurn].curBubble.isShow=false;
       this.bubbleMoveGene();
