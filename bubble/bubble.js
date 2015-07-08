@@ -123,10 +123,9 @@ var bubble={
   bubbleReloader: function(){
     switch(this.gameMode){
       case "battleMode":
-      var opponentsTurn=(this.battle.whoseTurn==1)?2:1;
-      this.battle.player[opponentsTurn].curBubble.num=this.battle.player[opponentsTurn].nextBubble.num;
-      this.battle.player[opponentsTurn].nextBubble.num=this.bubbleGenerator();
-      this.battle.player[opponentsTurn].curBubble.isShow=true;
+      this.battle.player[this.battle.whoseTurn].curBubble.num=this.battle.player[this.battle.whoseTurn].nextBubble.num;
+      this.battle.player[this.battle.whoseTurn].nextBubble.num=this.bubbleGenerator();
+      this.battle.player[this.battle.whoseTurn].curBubble.isShow=true;
       break;
       default:
     }
@@ -152,6 +151,7 @@ var bubble={
     this.bubbleAction(shortest.yPos,shortest.xPos);
     this.fallingCheck();
     this.bubbleReloader();
+    (this.battle.whoseTurn==1)?this.battle.whoseTurn=2:this.battle.whoseTurn=1;
   },
   bubbleAction:function(yOrigin,xOrigin){
     var bubbleColor= Math.floor(this.bubbleData[yOrigin][xOrigin].num/3)*3;
@@ -423,6 +423,7 @@ var bubble={
     },
     gameFrame: { x:64, y:3, sx:0, sy:84, width:472, height:394 },
     whoseTurn:1,
+    whoHasControl:1,
     clickCount:0,
     clickSpeed:1,
     player: {
@@ -538,30 +539,29 @@ var bubble={
       this.battle.clickSpeed=1;
     }
     if(keystate[KEY_LEFT]){
-      this.battle.player[this.battle.whoseTurn].arrow.angle-=this.battle.clickSpeed;
-      if(this.battle.player[this.battle.whoseTurn].arrow.angle < -67) this.battle.player[this.battle.whoseTurn].arrow.angle = -67;
+      this.battle.player[this.battle.whoHasControl].arrow.angle-=this.battle.clickSpeed;
+      if(this.battle.player[this.battle.whoHasControl].arrow.angle < -67) this.battle.player[this.battle.whoHasControl].arrow.angle = -67;
     }
-    if(keystate[KEY_RIGHT]||this.isRectClick(this.battle.player[this.battle.whoseTurn].buttonRight.x,this.battle.player[this.battle.whoseTurn].buttonRight.y,this.battle.player[this.battle.whoseTurn].buttonRight.width,this.battle.player[this.battle.whoseTurn].buttonRight.height)){
-      this.battle.player[this.battle.whoseTurn].arrow.angle+=this.battle.clickSpeed;
-      if(this.battle.player[this.battle.whoseTurn].arrow.angle > 67) this.battle.player[this.battle.whoseTurn].arrow.angle = 67;
+    if(keystate[KEY_RIGHT]||this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonRight.x,this.battle.player[this.battle.whoHasControl].buttonRight.y,this.battle.player[this.battle.whoHasControl].buttonRight.width,this.battle.player[this.battle.whoHasControl].buttonRight.height)){
+      this.battle.player[this.battle.whoHasControl].arrow.angle+=this.battle.clickSpeed;
+      if(this.battle.player[this.battle.whoHasControl].arrow.angle > 67) this.battle.player[this.battle.whoHasControl].arrow.angle = 67;
     }
-    if(this.isRectClick(this.battle.player[this.battle.whoseTurn].buttonLeft.x,this.battle.player[this.battle.whoseTurn].buttonLeft.y,this.battle.player[this.battle.whoseTurn].buttonLeft.width,this.battle.player[this.battle.whoseTurn].buttonLeft.height)){
-      this.battle.player[this.battle.whoseTurn].arrow.angle-=this.battle.clickSpeed;
-      if(this.battle.player[this.battle.whoseTurn].arrow.angle < -67) this.battle.player[this.battle.whoseTurn].arrow.angle = -67;
+    if(this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonLeft.x,this.battle.player[this.battle.whoHasControl].buttonLeft.y,this.battle.player[this.battle.whoHasControl].buttonLeft.width,this.battle.player[this.battle.whoHasControl].buttonLeft.height)){
+      this.battle.player[this.battle.whoHasControl].arrow.angle-=this.battle.clickSpeed;
+      if(this.battle.player[this.battle.whoHasControl].arrow.angle < -67) this.battle.player[this.battle.whoHasControl].arrow.angle = -67;
       this.battle.clickCount=20;
       this.battle.clickSpeed++;
     }
-    if(this.isRectClick(this.battle.player[this.battle.whoseTurn].buttonRight.x,this.battle.player[this.battle.whoseTurn].buttonRight.y,this.battle.player[this.battle.whoseTurn].buttonRight.width,this.battle.player[this.battle.whoseTurn].buttonRight.height)){
-      this.battle.player[this.battle.whoseTurn].arrow.angle+=this.battle.clickSpeed;
-      if(this.battle.player[this.battle.whoseTurn].arrow.angle > 67) this.battle.player[this.battle.whoseTurn].arrow.angle = 67;
+    if(this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonRight.x,this.battle.player[this.battle.whoHasControl].buttonRight.y,this.battle.player[this.battle.whoHasControl].buttonRight.width,this.battle.player[this.battle.whoHasControl].buttonRight.height)){
+      this.battle.player[this.battle.whoHasControl].arrow.angle+=this.battle.clickSpeed;
+      if(this.battle.player[this.battle.whoHasControl].arrow.angle > 67) this.battle.player[this.battle.whoHasControl].arrow.angle = 67;
       this.battle.clickCount=20;
       this.battle.clickSpeed++;
     }
-    if(this.bubbleMove.status===false &&(keystate[KEY_SPACE]|| this.isRectClick(this.battle.player[this.battle.whoseTurn].buttonShoot.x,this.battle.player[this.battle.whoseTurn].buttonShoot.y,this.battle.player[this.battle.whoseTurn].buttonShoot.width,this.battle.player[this.battle.whoseTurn].buttonShoot.height))){
-      console.log("buttonShoot");
-      this.battle.player[this.battle.whoseTurn].curBubble.isShow=false;
+    if(this.bubbleMove.status===false &&(keystate[KEY_SPACE]|| this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonShoot.x,this.battle.player[this.battle.whoHasControl].buttonShoot.y,this.battle.player[this.battle.whoHasControl].buttonShoot.width,this.battle.player[this.battle.whoHasControl].buttonShoot.height))){
+      this.battle.player[this.battle.whoHasControl].curBubble.isShow=false;
       this.bubbleMoveGene();
-      (this.battle.whoseTurn==1)?this.battle.whoseTurn=2:this.battle.whoseTurn=1;
+      (this.battle.whoHasControl==1)?this.battle.whoHasControl=2:this.battle.whoHasControl=1;
     }
   }
 };
