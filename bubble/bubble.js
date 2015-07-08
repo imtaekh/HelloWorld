@@ -4,10 +4,13 @@ var bubble={
   backgroundSheet: undefined,
   gameMode:undefined,
   click: false,
+  isGameOver: undefined,
+  turnCount: undefined,
   numOfColumn: undefined,
   bubbleData: undefined,
 	powerOn: function(){
     gameOn = true;
+    this.isGameOver = false;
     this.gameMode = null;
     this.numOfColumn = null;
     this.bubbleData = null;
@@ -84,6 +87,7 @@ var bubble={
 		ctx.restore();
 	},
 	exit: function(){
+    gameOn = true;
 		this.status = false;
 	},
   bubbles: {
@@ -152,6 +156,12 @@ var bubble={
     this.fallingCheck();
     this.bubbleReloader();
     (this.battle.whoseTurn==1)?this.battle.whoseTurn=2:this.battle.whoseTurn=1;
+    this.turnCount++;
+    if(this.turnCount !== 0 && this.turnCount%10 == 0) {
+      this.lineAdder();
+    }
+    this.gameOverCheck();
+    oneHit(KEY_SPACE);
   },
   bubbleAction:function(yOrigin,xOrigin){
     var bubbleColor= Math.floor(this.bubbleData[yOrigin][xOrigin].num/3)*3;
@@ -226,6 +236,7 @@ var bubble={
           this.bubbleFallingGene(this.bubbleData[i][j].y,this.bubbleData[i][j].x,this.bubbleData[i][j].num);
           this.bubbleData[i][j].num = null;
           this.bubbleData[i][j].isFalling = false;
+
         }
       }
     }
@@ -260,7 +271,7 @@ var bubble={
       var offset=this.gapOffset(i);
       for(var j=0; j<this.numOfColumn+offset; j++){
         if(this.bubbleData[i][j].num !== null && this.bubbleData[i][j].isFalling === false){
-           this.bubbleData[i][j].isFalling=true;
+          this.bubbleData[i][j].isFalling=true;
         }
       }
     }
@@ -273,14 +284,14 @@ var bubble={
     this.fallingProvoke();
   },
   unattachedCheckRecursive: function(yOrigin,xOrigin){
-    dot(this.bubbleData[yOrigin][xOrigin].x,this.bubbleData[yOrigin][xOrigin].y,"blue");
+  //  dot(this.bubbleData[yOrigin][xOrigin].x,this.bubbleData[yOrigin][xOrigin].y,"blue");
 
     this.bubbleData[yOrigin][xOrigin].isFalling=false;
     var around=this.getAroundPosInfo(yOrigin,xOrigin);
 
     for(var i =0; i<6; i++){
       if(around[i].y >=0 && around[i].y < 12 ){
-        var offset = this.gapOffset(0);
+        var offset = this.gapOffset(around[i].y);
         if(around[i].x >=0 && around[i].x < this.numOfColumn+offset){
           if(this.bubbleData[around[i].y][around[i].x].num !==null && this.bubbleData[around[i].y][around[i].x].isFalling === true){
             this.unattachedCheckRecursive(around[i].y,around[i].x);
@@ -293,7 +304,7 @@ var bubble={
   bubbleFallingGene: function(yOrigin, xOrigin, numOrigin){
     for(var i=0; i<100; i++){
       if(this.bubbleFalling[i]===undefined){
-        this.bubbleFalling[i]={num:numOrigin,x:xOrigin,y:yOrigin,yValocity:-Math.random()*4,xValocity:Math.random()*6-2};
+        this.bubbleFalling[i]={num:numOrigin,x:xOrigin,y:yOrigin,yValocity:-Math.random()*4,xValocity:Math.random()*6-3};
         break;
       }
     }
@@ -401,8 +412,7 @@ var bubble={
       this.bubbleData[0].isGap=true;
       xPosOffset=16;
     }
-    var offset = this.gapOffset(0);
-    for(var j=0; j<this.numOfColumn+offset; j++){
+    for(var j=0; j<this.numOfColumn+this.gapOffset(0); j++){
       this.battle.bubbleData[0][j]={};
       if(j==13 && this.battle.bubbleData[0].isGap){
         this.battle.bubbleData[0][j].num=null
@@ -414,6 +424,35 @@ var bubble={
       this.battle.bubbleData[0][j].y=y+i*28;
     }
   },
+  gameOverCheck: function(){
+    switch(this.gameMode){
+      case "battleMode":
+      var lastRow=bubble.bubbleData.length-1;
+      var isP1Lose=false, isP2Lose=false;
+      var offset=this.gapOffset(lastRow);
+      for(var j=0; j<this.numOfColumn+offset; j++){
+        if(this.battle.bubbleData[lastRow][j].num !== null){
+          if(j<7+offset){
+            isP1Lose=true;
+          }else if(j>6){
+            isP2Lose=true;
+          }
+        }
+      }
+      if(isP1Lose&&isP2Lose){
+        this.gameOver("Draw!");
+      }else if(isP1Lose){
+        this.gameOver("Player 1 Lose!");
+      }else if(isP2Lose){
+        this.gameOver("Player 2 Lose!");
+      }
+        break;
+      default:
+    }
+  },
+  gameOver: function(str){
+    this.isGameOver = true;
+  },
   battle: {
     status:false,
     background: {
@@ -422,26 +461,26 @@ var bubble={
       0:{ x:76, y:15, sx:0, sy:0, width:224, height:186 }
     },
     gameFrame: { x:64, y:3, sx:0, sy:84, width:472, height:394 },
-    whoseTurn:1,
-    whoHasControl:1,
-    clickCount:0,
-    clickSpeed:1,
+    whoseTurn: undefined,
+    whoHasControl: undefined,
+    clickCount: undefined,
+    clickSpeed: 1,
     player: {
       1:{
-        arrow: { angle: 0, x:180, y:299, sx:216, sy:482, width:16, height:80 },
+        arrow: { angle: 0, x:180, y:299+4, sx:216, sy:482, width:16, height:80 },
         buttonLeft:{ x:82, y:345, sx:236, sy:482, width:38, height:28 },
         buttonRight:{ x:254, y:345, sx:278, sy:482, width:38, height:28 },
         buttonShoot:{ x:204, y:340, sx:320, sy:482, width:26, height:38 },
-        curBubble:{ isShow:true, num:undefined, x:188, y:342 },
-        nextBubble:{ num:undefined, x:153, y:365 }
+        curBubble:{ isShow:true, num:undefined, x:188, y:342+4 },
+        nextBubble:{ num:undefined, x:153, y:365+4 }
       },
       2:{
-        arrow: { angle: 0, x:404, y:299, sx:216, sy:482, width:16, height:80 },
+        arrow: { angle: 0, x:404, y:299+4, sx:216, sy:482, width:16, height:80 },
         buttonLeft:{ x:306, y:345, sx:236, sy:482, width:38, height:28 },
         buttonRight:{ x:478, y:345, sx:278, sy:482, width:38, height:28 },
         buttonShoot:{ x:428, y:340, sx:320, sy:482, width:26, height:38 },
-        curBubble:{ isShow:true, num:undefined, x:412, y:342 },
-        nextBubble:{ num:undefined, x:377, y:365 }
+        curBubble:{ isShow:true, num:undefined, x:412, y:342+4 },
+        nextBubble:{ num:undefined, x:377, y:365+4 }
       },
       bubbleData:undefined,
     }
@@ -450,6 +489,10 @@ var bubble={
     this.battle.status = true;
     this.gameMode = "battleMode";
     this.numOfColumn = 14;
+    this.turnCount = 0;
+    this.battle.whoseTurn = 1;
+    this.battle.whoHasControl = 1;
+    this.battle.clickCount = 0;
     this.battle.background.num=Math.floor(Math.random()*this.battle.background.maxNum);
     this.battle.player[1].curBubble.num=this.bubbleGenerator();
     this.battle.player[1].nextBubble.num=this.bubbleGenerator();
@@ -491,6 +534,7 @@ var bubble={
       }
       this.bubbleData = this.battle.bubbleData;
     }
+    oneHit(KEY_SPACE);
   },
   battleDraw: function(){
     //black background & gamebBackground
@@ -538,30 +582,32 @@ var bubble={
     } else {
       this.battle.clickSpeed=1;
     }
-    if(keystate[KEY_LEFT]){
-      this.battle.player[this.battle.whoHasControl].arrow.angle-=this.battle.clickSpeed;
-      if(this.battle.player[this.battle.whoHasControl].arrow.angle < -67) this.battle.player[this.battle.whoHasControl].arrow.angle = -67;
-    }
-    if(keystate[KEY_RIGHT]||this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonRight.x,this.battle.player[this.battle.whoHasControl].buttonRight.y,this.battle.player[this.battle.whoHasControl].buttonRight.width,this.battle.player[this.battle.whoHasControl].buttonRight.height)){
-      this.battle.player[this.battle.whoHasControl].arrow.angle+=this.battle.clickSpeed;
-      if(this.battle.player[this.battle.whoHasControl].arrow.angle > 67) this.battle.player[this.battle.whoHasControl].arrow.angle = 67;
-    }
-    if(this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonLeft.x,this.battle.player[this.battle.whoHasControl].buttonLeft.y,this.battle.player[this.battle.whoHasControl].buttonLeft.width,this.battle.player[this.battle.whoHasControl].buttonLeft.height)){
-      this.battle.player[this.battle.whoHasControl].arrow.angle-=this.battle.clickSpeed;
-      if(this.battle.player[this.battle.whoHasControl].arrow.angle < -67) this.battle.player[this.battle.whoHasControl].arrow.angle = -67;
-      this.battle.clickCount=20;
-      this.battle.clickSpeed++;
-    }
-    if(this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonRight.x,this.battle.player[this.battle.whoHasControl].buttonRight.y,this.battle.player[this.battle.whoHasControl].buttonRight.width,this.battle.player[this.battle.whoHasControl].buttonRight.height)){
-      this.battle.player[this.battle.whoHasControl].arrow.angle+=this.battle.clickSpeed;
-      if(this.battle.player[this.battle.whoHasControl].arrow.angle > 67) this.battle.player[this.battle.whoHasControl].arrow.angle = 67;
-      this.battle.clickCount=20;
-      this.battle.clickSpeed++;
-    }
-    if(this.bubbleMove.status===false &&(keystate[KEY_SPACE]|| this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonShoot.x,this.battle.player[this.battle.whoHasControl].buttonShoot.y,this.battle.player[this.battle.whoHasControl].buttonShoot.width,this.battle.player[this.battle.whoHasControl].buttonShoot.height))){
-      this.battle.player[this.battle.whoHasControl].curBubble.isShow=false;
-      this.bubbleMoveGene();
-      (this.battle.whoHasControl==1)?this.battle.whoHasControl=2:this.battle.whoHasControl=1;
+    if( bubble.isGameOver !== true){
+      if(keystate[KEY_LEFT]){
+        this.battle.player[this.battle.whoHasControl].arrow.angle-=this.battle.clickSpeed;
+        if(this.battle.player[this.battle.whoHasControl].arrow.angle < -75) this.battle.player[this.battle.whoHasControl].arrow.angle = -75;
+      }
+      if(keystate[KEY_RIGHT]||this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonRight.x,this.battle.player[this.battle.whoHasControl].buttonRight.y,this.battle.player[this.battle.whoHasControl].buttonRight.width,this.battle.player[this.battle.whoHasControl].buttonRight.height)){
+        this.battle.player[this.battle.whoHasControl].arrow.angle+=this.battle.clickSpeed;
+        if(this.battle.player[this.battle.whoHasControl].arrow.angle > 75) this.battle.player[this.battle.whoHasControl].arrow.angle = 75;
+      }
+      if(this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonLeft.x,this.battle.player[this.battle.whoHasControl].buttonLeft.y,this.battle.player[this.battle.whoHasControl].buttonLeft.width,this.battle.player[this.battle.whoHasControl].buttonLeft.height)){
+        this.battle.player[this.battle.whoHasControl].arrow.angle-=this.battle.clickSpeed;
+        if(this.battle.player[this.battle.whoHasControl].arrow.angle < -75) this.battle.player[this.battle.whoHasControl].arrow.angle = -75;
+        this.battle.clickCount=20;
+        this.battle.clickSpeed++;
+      }
+      if(this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonRight.x,this.battle.player[this.battle.whoHasControl].buttonRight.y,this.battle.player[this.battle.whoHasControl].buttonRight.width,this.battle.player[this.battle.whoHasControl].buttonRight.height)){
+        this.battle.player[this.battle.whoHasControl].arrow.angle+=this.battle.clickSpeed;
+        if(this.battle.player[this.battle.whoHasControl].arrow.angle > 75) this.battle.player[this.battle.whoHasControl].arrow.angle = 75;
+        this.battle.clickCount=20;
+        this.battle.clickSpeed++;
+      }
+      if(this.bubbleMove.status===false &&(oneHit(KEY_SPACE)|| this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonShoot.x,this.battle.player[this.battle.whoHasControl].buttonShoot.y,this.battle.player[this.battle.whoHasControl].buttonShoot.width,this.battle.player[this.battle.whoHasControl].buttonShoot.height))){
+        this.battle.player[this.battle.whoHasControl].curBubble.isShow=false;
+        this.bubbleMoveGene();
+        (this.battle.whoHasControl==1)?this.battle.whoHasControl=2:this.battle.whoHasControl=1;
+      }
     }
   }
 };

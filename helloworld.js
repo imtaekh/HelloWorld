@@ -34,12 +34,21 @@ var ctx = canvas.getContext("2d");
 if(window.innerHeight>window.innerWidth){
 	alert("Please rotate your device to landscape mode");
 }
-
+function oneHit(key){
+	if(keystateOneHit[key]){
+		delete keystateOneHit[key];
+		return true;
+	}
+	return false;
+}
 var keystate = {};
+var keystateOneHit = {};
 document.addEventListener("keydown", function(e){
+
+	(keystate[e.keyCode])?keystateOneHit[e.keyCode]:keystateOneHit[e.keyCode] = true;
+
 	if(inputAllowed) keystate[e.keyCode] = true;
 	if(instruction.isOn) instruction.isOn = false;
-//	console.log(e.keyCode);
 });
 document.addEventListener("keyup", function(e){
 	delete keystate[e.keyCode];
