@@ -105,10 +105,10 @@ window.onload = function(){
 function checkWindowSize(){
 	if((window.innerWidth<MAX_WIDTH||window.innerHeight<MAX_HEIGHT)&&window.innerWidth/window.innerHeight>MAX_WIDTH/MAX_HEIGHT){
 		canvas.style.height=window.innerHeight+"px";
-		canvas.style.width=window.innerHeight*MAX_WIDTH/MAX_HEIGHT+"px";
+		canvas.style.width=canvas.style.height*MAX_WIDTH/MAX_HEIGHT+"px";
 	} else if((window.innerWidth<MAX_WIDTH||window.innerHeight<MAX_HEIGHT)&&window.innerHeight/window.innerWidth>MAX_HEIGHT/MAX_WIDTH){
-		canvas.style.width=window.innerWidth+"px";
-		canvas.style.height=window.innerWidth*MAX_HEIGHT/MAX_WIDTH+"px";
+		canvas.style.width=window.innerWidth-5+"px";
+		canvas.style.height=canvas.style.width*MAX_HEIGHT/MAX_WIDTH+"px";
 	} else {
 		canvas.style.width=MAX_WIDTH;
 		canvas.style.height=MAX_HEIGHT;

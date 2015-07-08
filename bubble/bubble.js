@@ -155,7 +155,7 @@ var bubble={
   bubbleAction:function(yOrigin,xOrigin){
     var numOfColumn = (this.gameMode=="battleMode")?14:undefined;
     var bubbleData = (this.gameMode=="battleMode")?this.battle.bubbleData:undefined;
-    var BubbleColor= Math.floor(bubbleData[yOrigin][xOrigin].num/3)*3;
+    var bubbleColor= Math.floor(bubbleData[yOrigin][xOrigin].num/3)*3;
     switch (this.bubbles[bubbleData[yOrigin][xOrigin].num].special) {
       case "colorChange":
         var gapOffset=0;
@@ -163,26 +163,32 @@ var bubble={
           gapOffset = -1;
         }
         for(var j=0;j<numOfColumn+gapOffset;j++){
-          bubbleData[yOrigin][j].num=BubbleColor;
+          bubbleData[yOrigin][j].num=bubbleColor;
         }
         break;
       case "bomb":
-
+        bubbleData[yOrigin][xOrigin].isFalling=true;
+        var around=this.getAroundPosInfo(yOrigin,xOrigin);
+        for(var i =0; i<6; i++){
+          var gapOffset=0;
+          if(around[i].y >=0 && around[i].y < 14 ){
+            if (bubbleData[around[i].y].isGap){
+              gapOffset= -1;
+            }
+            if(around[i].x >=0 && around[i].x < numOfColumn+gapOffset){
+              bubbleData[around[i].y][around[i].x].num =bubbleColor;
+  //            bubbleData[around[i].y][around[i].x].isFalling = true;
+            }
+          }
+        }
         break;
       default:
       this.bubbleCheck(yOrigin,xOrigin);
 
     }
   },
-  bubbleCheck:function(yOrigin,xOrigin){
-
-    var numOfColumn = (this.gameMode=="battleMode")?14:undefined;
+  getAroundPosInfo: function(yOrigin,xOrigin){
     var bubbleData = (this.gameMode=="battleMode")?this.battle.bubbleData:undefined;
-
-
-    bubbleData[yOrigin][xOrigin].isFalling=true;
-
-
     var around={
       0:{y:yOrigin, x:xOrigin-1},
       3:{y:yOrigin, x:xOrigin+1},
@@ -199,17 +205,29 @@ var bubble={
       around[4]={y:yOrigin+1, x:xOrigin},
       around[5]={y:yOrigin+1, x:xOrigin-1}
     }
+    return around;
+  },
+  bubbleCheck:function(yOrigin,xOrigin){
+
+    var numOfColumn = (this.gameMode=="battleMode")?14:undefined;
+    var bubbleData = (this.gameMode=="battleMode")?this.battle.bubbleData:undefined;
+
+
+    bubbleData[yOrigin][xOrigin].isFalling=true;
+
+    var around=this.getAroundPosInfo(yOrigin,xOrigin);
+
     for(var i =0; i<6; i++){
       var gapOffset=0;
-      if(around[i].x >=0 && around[i].x < numOfColumn+gapOffset && around[i].y >=0 && around[i].y < 14 ){
-
+      if(around[i].y >=0 && around[i].y < 14 ){
         if (bubbleData[around[i].y].isGap){
           gapOffset= -1;
         }
-
-        dot(bubbleData[around[i].y][around[i].x].x,bubbleData[around[i].y][around[i].x].y);
-        if(bubbleData[around[i].y][around[i].x].num==bubbleData[yOrigin][xOrigin].num && bubbleData[around[i].y][around[i].x].isFalling == false){
-          this.bubbleCheck(around[i].y,around[i].x);
+        if(around[i].x >=0 && around[i].x < numOfColumn+gapOffset){
+          dot(bubbleData[around[i].y][around[i].x].x,bubbleData[around[i].y][around[i].x].y);
+          if(bubbleData[around[i].y][around[i].x].num==bubbleData[yOrigin][xOrigin].num && bubbleData[around[i].y][around[i].x].isFalling == false){
+            this.bubbleCheck(around[i].y,around[i].x);
+          }
         }
       }
     }
@@ -261,8 +279,6 @@ var bubble={
         }
       }
     }
-
-
   },
   bubbleMove:{
     status: false,
