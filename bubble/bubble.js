@@ -88,7 +88,7 @@ var bubble={
 		this.status = false;
 	},
   bubbles: {
-    numberOfColor:3, width:32, height:32,
+    numberOfColor:1, width:32, height:32,
     0:{color: 0, sx:0, sy:482, special:null},
     1:{color: 0, sx:0, sy:518, special:"bomb"},
     2:{color: 0, sx:0, sy:554, special:"colorChange"},
@@ -98,15 +98,15 @@ var bubble={
     6:{color: 2, sx:72, sy:482, special:null},
     7:{color: 2, sx:72, sy:518, special:"bomb"},
     8:{color: 2, sx:72, sy:554, special:"colorChange"},
-//    9:{color: 3, sx:108, sy:482, special:null},
-//    10:{color: 3, sx:108, sy:518, special:"bomb"},
-//    11:{color: 3, sx:108, sy:554, special:"colorChange"},
-//    12:{color: 4, sx:144, sy:482, special:null},
-//    13:{color: 4, sx:144, sy:518, special:"bomb"},
-//    14:{color: 4, sx:144, sy:554, special:"colorChange"},
-//    15:{color: 5, sx:180, sy:482, special:null},
-//    16:{color: 5, sx:180, sy:518, special:"bomb"},
-//    17:{color: 5, sx:180, sy:554, special:"colorChange"},
+    9:{color: 3, sx:108, sy:482, special:null},
+    10:{color: 3, sx:108, sy:518, special:"bomb"},
+    11:{color: 3, sx:108, sy:554, special:"colorChange"},
+    12:{color: 4, sx:144, sy:482, special:null},
+    13:{color: 4, sx:144, sy:518, special:"bomb"},
+    14:{color: 4, sx:144, sy:554, special:"colorChange"},
+    15:{color: 5, sx:180, sy:482, special:null},
+    16:{color: 5, sx:180, sy:518, special:"bomb"},
+    17:{color: 5, sx:180, sy:554, special:"colorChange"},
   },
   bubbleGenerator: function(){
     var randNum=Math.random();
@@ -176,8 +176,8 @@ var bubble={
               gapOffset= -1;
             }
             if(around[i].x >=0 && around[i].x < numOfColumn+gapOffset){
-              bubbleData[around[i].y][around[i].x].num =bubbleColor;
-  //            bubbleData[around[i].y][around[i].x].isFalling = true;
+              bubbleData[around[i].y][around[i].x].num =15;
+              bubbleData[around[i].y][around[i].x].isFalling = true;
             }
           }
         }
@@ -211,10 +211,7 @@ var bubble={
 
     var numOfColumn = (this.gameMode=="battleMode")?14:undefined;
     var bubbleData = (this.gameMode=="battleMode")?this.battle.bubbleData:undefined;
-
-
     bubbleData[yOrigin][xOrigin].isFalling=true;
-
     var around=this.getAroundPosInfo(yOrigin,xOrigin);
 
     for(var i =0; i<6; i++){
@@ -235,7 +232,6 @@ var bubble={
   fallingCheck: function(){
     var numOfColumn = (this.gameMode=="battleMode")?14:undefined;
     var bubbleData = (this.gameMode=="battleMode")?this.battle.bubbleData:undefined;
-
     var count=0;
 
     for(var i=0;i<bubbleData.length;i++){
@@ -243,7 +239,6 @@ var bubble={
       if (bubbleData[i].isGap){
         gapOffset= -1;
       }
-
       for(var j=0; j<numOfColumn+gapOffset; j++){
         if(bubbleData[i][j].num !== null && bubbleData[i][j].isFalling === true){
           count++;
@@ -257,9 +252,9 @@ var bubble={
         if (bubbleData[i].isGap){
           gapOffset= -1;
         }
-
         for(var j=0; j<numOfColumn+gapOffset; j++){
           if(bubbleData[i][j].num !== null && bubbleData[i][j].isFalling === true){
+            this.bubbleFallingGene(bubbleData[i][j].y,bubbleData[i][j].x,bubbleData[i][j].num);
             bubbleData[i][j].num = null;
             bubbleData[i][j].isFalling = false;
           }
@@ -271,7 +266,6 @@ var bubble={
         if (bubbleData[i].isGap){
           gapOffset= -1;
         }
-
         for(var j=0; j<numOfColumn+gapOffset; j++){
           if(bubbleData[i][j].num !== null && bubbleData[i][j].isFalling === true){
             bubbleData[i][j].isFalling = false;
@@ -280,12 +274,42 @@ var bubble={
       }
     }
   },
+  bubbleFalling: {},
+  bubbleFallingGene: function(yOrigin, xOrigin, bubbleNumOrigin){
+    for(var i=0; i<100; i++){
+      if(this.bubbleFalling[i]===undefined){
+        this.bubbleFalling[i]={bubbleNum:bubbleNumOrigin,x:xOrigin,y:yOrigin,yValocity:-Math.random()*4,xValocity:Math.random()*6-2};
+        break;
+      }
+    }
+  },
+  bubbleFallingUpdate: function(){
+    for(var i=0; i<100; i++){
+      if(this.bubbleFalling[i]!==undefined){
+
+        this.bubbleFalling[i].y+=this.bubbleFalling[i].yValocity;
+        this.bubbleFalling[i].x+=this.bubbleFalling[i].xValocity;
+
+        this.bubbleFalling[i].yValocity+=gravity;
+        if(this.bubbleFalling[i].y>WIDTH+16){
+          delete this.bubbleFalling[i];
+        }
+      }
+    }
+  },
+  bubbleFallingDraw: function(){
+    for(var i=0; i<100; i++){
+      if(this.bubbleFalling[i]!==undefined){
+        ctx.drawImage(this.spriteSheet, this.bubbles[this.bubbleFalling[i].bubbleNum].sx, this.bubbles[this.bubbleFalling[i].bubbleNum].sy, this.bubbles.width, this.bubbles.height, this.bubbleFalling[i].x-16, this.bubbleFalling[i].y-16, this.bubbles.width, this.bubbles.height);
+      }
+    }
+  },
   bubbleMove:{
     status: false,
     x: undefined,
     y: undefined,
     bubbleNum: undefined,
-    velocity: 3,
+    velocity: 10,
     xVelocity: undefined,
     yVelocity: undefined,
     borderLeft: undefined,
@@ -322,7 +346,6 @@ var bubble={
       for(var j=0; j<14; j++){
         if(this.battle.bubbleData[i][j].num!==null){
           if(distance(this.battle.bubbleData[i][j], this.bubbleMove, "both")<=33){
-
             this.bubbleGlue();
             return;
           }
@@ -496,6 +519,8 @@ bubbleGame.update = function(){
 		if(bubble.battle.status){
 			bubble.battleDraw();
 			bubble.battleUpdate();
+      bubble.bubbleFallingDraw();
+      bubble.bubbleFallingUpdate();
 		}
 		if(bubble.bubbleMove.status){
 			bubble.bubbleMoveDraw();
