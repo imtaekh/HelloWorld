@@ -7,6 +7,7 @@ var bubble={
   turnCount: undefined,
   numOfColumn: undefined,
   bubbleData: undefined,
+  TargetPosition: {xPos:undefined, yPos:undefined, distance:undefined},
 	powerOn: function(){
     gameOn = true;
     this.gameMode = null;
@@ -168,23 +169,24 @@ var bubble={
     }
   },
   bubbleGlue: function(bubbleObj){
-    var shortest={xPos:null, yPos:null, distance:60};
+    this.TargetPosition={xPos:null, yPos:null, distance:60};
     for(var i=0;i<this.bubbleData.length;i++){
       var offset=this.gapOffset(i);
       for(var j=0; j<this.numOfColumn+offset; j++){
         if(this.bubbleData[i][j].num===null){
-          if(distance(this.bubbleData[i][j], bubbleObj, "both")<shortest.distance){
-            shortest.distance =distance(this.bubbleData[i][j], bubbleObj, "both");
-            shortest.xPos=j;
-            shortest.yPos=i;
+          if(distance(this.bubbleData[i][j], bubbleObj, "both")<this.TargetPosition.distance){
+            this.TargetPosition.distance =distance(this.bubbleData[i][j], bubbleObj, "both");
+            this.TargetPosition.xPos=j;
+            this.TargetPosition.yPos=i;
           }
         }
       }
     }
     dot(bubbleObj.x,bubbleObj.y,"red");
-    dot(this.bubbleData[shortest.yPos][shortest.xPos].x,this.bubbleData[shortest.yPos][shortest.xPos].y,"blue");
-    this.bubbleData[shortest.yPos][shortest.xPos].num = bubbleObj.num;
-    this.bubbleAction(shortest.yPos,shortest.xPos);
+    dot(this.bubbleData[this.TargetPosition.yPos][this.TargetPosition.xPos].x,this.bubbleData[this.TargetPosition.yPos][this.TargetPosition.xPos].y,"blue");
+    this.bubbleData[this.TargetPosition.yPos][this.TargetPosition.xPos].num = bubbleObj.num;
+    this.bubbleData[this.TargetPosition.yPos][this.TargetPosition.xPos].obstacleChecked = false;
+    this.bubbleAction(this.TargetPosition.yPos,this.TargetPosition.xPos);
   },
   bubbleGlueCheck: function(bubbleObj){
     for(var i=0;i<this.battle.bubbleData.length;i++){
@@ -207,7 +209,7 @@ var bubble={
     function glueIt(pointer){
       pointer.bubbleGlue(bubbleObj);
       if(bubbleObj.id !== undefined){
-        delete pointer.obstacleBubble[bubbleObj.id]
+        delete pointer.obstacleBubble[bubbleObj.id];
       }else if(pointer.bubbleMove.status){
         pointer.turnOver();
       }
@@ -251,6 +253,8 @@ var bubble={
           }
         }
         break;
+      case "obstacle":
+        break;
       default:
       this.bubbleCheck(yOrigin,xOrigin);
     }
@@ -290,6 +294,25 @@ var bubble={
       }
     }
   },
+  obstacleCheck:function(yOrigin,xOrigin){
+    this.bubbleData[yOrigin][xOrigin].obstacleChecked=true;
+    var around=this.getAroundPosInfo(yOrigin,xOrigin);
+
+    for(var i =0; i<6; i++){
+      if(around[i].y >=0 && around[i].y < 12 ){
+        var offset=this.gapOffset(around[i].y);
+        if(around[i].x >=0 && around[i].x < this.numOfColumn+offset){
+          dot(this.bubbleData[around[i].y][around[i].x].x,this.bubbleData[around[i].y][around[i].x].y,"yellow");
+          if(this.bubbleData[around[i].y][around[i].x].num==this.bubbleData[yOrigin][xOrigin].num && this.bubbleData[around[i].y][around[i].x].obstacleChecked === false){
+            this.obstacleCheck(around[i].y,around[i].x);
+          }
+          if(this.bubbleData[around[i].y][around[i].x].num==99){
+            this.bubbleData[around[i].y][around[i].x].isFalling=true;
+          }
+        }
+      }
+    }
+  },
   fallingProvoke: function(){
     for(i=0;i<this.bubbleData.length;i++){
       var offset=this.gapOffset(i);
@@ -315,8 +338,16 @@ var bubble={
       }
     }
     if(count>3){
+      this.obstacleCheck(this.TargetPosition.yPos,this.TargetPosition.xPos);
       this.fallingProvoke();
       this.unattachedCheck();
+      if(count>4){
+        for(var i=0; i<count/4;i++){
+          var opponentTurn=(this.battle.whoseTurn==1)?2:1;
+          var xPos=this.battle.player[opponentTurn].borderLeft+(Math.random()*230);
+          this.obstacleBubbleGene(xPos);
+        }
+      }
     } else {
       for(var i=0;i<this.bubbleData.length;i++){
         var offset=this.gapOffset(i);
@@ -434,11 +465,7 @@ var bubble={
       this.bubbleMove.x = this.battle.player[this.battle.whoseTurn].curBubble.x;
       this.bubbleMove.y = this.battle.player[this.battle.whoseTurn].curBubble.y;
       this.bubbleMove.num = this.battle.player[this.battle.whoseTurn].curBubble.num;
-      if(this.battle.whoseTurn==1){
-        this.bubbleMove.borderLeft = 77;
-      } else {
-        this.bubbleMove.borderLeft = 285;
-      }
+      this.bubbleMove.borderLeft = this.battle.player[this.battle.whoseTurn].borderLeft;
       this.bubbleMove.borderRight = this.bubbleMove.borderLeft+238;
       this.bubbleMove.yVelocity=Number(Math.sin(bubble.battle.player[this.battle.whoseTurn].arrow.angle*Math.PI/180-1/2*Math.PI)).toFixed(2)*this.bubbleMove.velocity;
       this.bubbleMove.xVelocity=Number(Math.cos(bubble.battle.player[this.battle.whoseTurn].arrow.angle*Math.PI/180-1/2*Math.PI)).toFixed(2)*this.bubbleMove.velocity;
@@ -493,6 +520,7 @@ var bubble={
       } else {
         this.battle.bubbleData[0][j].num=Math.floor(Math.random()*this.bubbles.numberOfColor)*3;
       }
+      this.battle.bubbleData[0][j].obstacleChecked=false;
       this.battle.bubbleData[0][j].isFalling=false;
       this.battle.bubbleData[0][j].x=x+j*32+xPosOffset;
       this.battle.bubbleData[0][j].y=y+i*28;
@@ -613,6 +641,7 @@ var bubble={
         buttonLeft:{ x:82, y:345, sx:236, sy:482, width:38, height:28 },
         buttonRight:{ x:254, y:345, sx:278, sy:482, width:38, height:28 },
         buttonShoot:{ x:204, y:340, sx:320, sy:482, width:26, height:38 },
+        borderLeft: 77,
         curBubble:{ isShow:true, num:undefined, x:188, y:342+4 },
         nextBubble:{ num:undefined, x:153, y:365+4 }
       },
@@ -621,6 +650,7 @@ var bubble={
         buttonLeft:{ x:306, y:345, sx:236, sy:482, width:38, height:28 },
         buttonRight:{ x:478, y:345, sx:278, sy:482, width:38, height:28 },
         buttonShoot:{ x:428, y:340, sx:320, sy:482, width:26, height:38 },
+        borderLeft: 285,
         curBubble:{ isShow:true, num:undefined, x:412, y:342+4 },
         nextBubble:{ num:undefined, x:377, y:365+4 }
       },
@@ -666,6 +696,7 @@ var bubble={
           this.battle.bubbleData[i][j].isFalling=false;
           this.battle.bubbleData[i][j].x=x+j*32+xPosOffset;
           this.battle.bubbleData[i][j].y=y+i*28;
+          this.battle.bubbleData[i][j].obstacleChecked=false;
         }
       } else{
         for(var j=0; j<14; j++){
@@ -674,6 +705,7 @@ var bubble={
           this.battle.bubbleData[i][j].isFalling=false;
           this.battle.bubbleData[i][j].x=x+j*32+xPosOffset;
           this.battle.bubbleData[i][j].y=y+i*28;
+          this.battle.bubbleData[i][j].obstacleChecked=false;
         }
       }
       this.bubbleData = this.battle.bubbleData;
