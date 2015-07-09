@@ -216,16 +216,24 @@ var bubble={
     }
   },
   turnOver: function(){
-      this.bubbleMove.status=false;
-      this.fallingCheck();
-      this.bubbleReloader();
-      (this.battle.whoseTurn==1)?this.battle.whoseTurn=2:this.battle.whoseTurn=1;
-      this.turnCount++;
-      if(this.turnCount !== 0 && this.turnCount%8 === 0) {
-        this.lineAdder();
+    this.bubbleMove.status=false;
+    this.fallingCheck();
+    this.bubbleReloader();
+    (this.battle.whoseTurn==1)?this.battle.whoseTurn=2:this.battle.whoseTurn=1;
+    this.turnCount++;
+    if(this.turnCount !== 0 && this.turnCount%12 === 0) {
+      this.lineAdder();
+    }
+    if(this.bubbleFalling.count>4){
+      for(var i=0; i<this.bubbleFalling.count/4;i++){
+        var xPos=this.battle.player[this.battle.whoseTurn].borderLeft+(Math.random()*230);
+        this.obstacleBubbleGene(xPos);
       }
-      this.gameOverCheck();
-      oneHit(KEY_SPACE);
+    }
+    console.log(this.bubbleFalling.count);
+    this.bubbleFalling.count=0;
+    this.gameOverCheck();
+    oneHit(KEY_SPACE);
   },
   bubbleAction:function(yOrigin,xOrigin){
     var bubbleColor= Math.floor(this.bubbleData[yOrigin][xOrigin].num/3)*3;
@@ -328,7 +336,6 @@ var bubble={
   },
   fallingCheck: function(){
     var count=0;
-
     for(var i=0;i<this.bubbleData.length;i++){
       var offset=this.gapOffset(i);
       for(var j=0; j<this.numOfColumn+offset; j++){
@@ -341,13 +348,6 @@ var bubble={
       this.obstacleCheck(this.TargetPosition.yPos,this.TargetPosition.xPos);
       this.fallingProvoke();
       this.unattachedCheck();
-      if(count>4){
-        for(var i=0; i<count/4;i++){
-          var opponentTurn=(this.battle.whoseTurn==1)?2:1;
-          var xPos=this.battle.player[opponentTurn].borderLeft+(Math.random()*230);
-          this.obstacleBubbleGene(xPos);
-        }
-      }
     } else {
       for(var i=0;i<this.bubbleData.length;i++){
         var offset=this.gapOffset(i);
@@ -419,11 +419,12 @@ var bubble={
       }
     }
   },
-  bubbleFalling: {},
+  bubbleFalling: {count:0},
   bubbleFallingGene: function(yOrigin, xOrigin, numOrigin){
     for(var i=0; i<100; i++){
       if(this.bubbleFalling[i]===undefined){
         this.bubbleFalling[i]={num:numOrigin,x:xOrigin,y:yOrigin,yValocity:-Math.random()*4,xValocity:Math.random()*6-3};
+        this.bubbleFalling.count++;
         break;
       }
     }
@@ -685,7 +686,7 @@ var bubble={
       }
       var x=76+16;
       var y=15+16;
-      if(i<5){
+      if(i<3){
         for(var j=0; j<14; j++){
           this.battle.bubbleData[i][j]={};
           if(j==13 && this.battle.bubbleData[i].isGap){
