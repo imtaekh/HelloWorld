@@ -4,18 +4,17 @@ var bubble={
   backgroundSheet: undefined,
   gameMode:undefined,
   click: false,
-  isGameOver: undefined,
   turnCount: undefined,
   numOfColumn: undefined,
   bubbleData: undefined,
 	powerOn: function(){
     gameOn = true;
-    this.isGameOver = false;
     this.gameMode = null;
+    this.gameOver.status = false;
     this.numOfColumn = null;
     this.bubbleData = null;
 		this.status = true;
-		this.menuGene();
+		this.menuGene("main");
 	},
 	isRectClick: function(x,y,width,height){
 		if(this.click &&mouse.x>x && mouse.y>y && mouse.x<x+width && mouse.y<y+height){
@@ -26,6 +25,7 @@ var bubble={
 	menu:{
 		status:false,
 		background: undefined,
+    textAlign: undefined,
 		title: {
 			status:undefined,
 			x:88,
@@ -36,33 +36,64 @@ var bubble={
 			height:80
 		}
 	},
-	menuGene: function() {
+	menuGene: function(options) {
     this.menu.status = true;
-    this.menu.background = true;
-    this.menu[1] = {x:120, y:165, width:180, height:25, string:"SINGLE PLAY"};
-    this.menu[2] = {x:120, y:255, width:180, height:25, string:"BATTLE MODE"};
-    this.menu[3] = {x:120, y:210, width:180, height:25, string:"RANKS(SINGLE)"};
-    this.menu[4] = {x:120, y:300, width:180, height:25, string:"EXIT"};
-    this.menu.title.status=true;
+    switch(options){
+      case "main":
+      this.menu.background = true;
+      this.menu.title.status = true;
+      this.menu.textAlign = "left";
+      this.menu[1] = {status: true, x:120, y:165, width:180, height:25, string:"SINGLE PLAY"}; //siglePlay
+      this.menu[2] = {status: true, x:120, y:255, width:180, height:25, string:"BATTLE MODE"}; //battleMode
+      this.menu[3] = {status: true, x:120, y:210, width:180, height:25, string:"RANKS(SINGLE)"}; //ranks
+      this.menu[4] = {status: true, x:120, y:300, width:80, height:25, string:"EXIT"}; //exit
+      this.menu[5] = {status: false}; //main menu
+      break;
+      case "battleMode":
+      this.menu.background = false;
+      this.menu.title.status = false;
+      this.menu.textAlign = "center";
+      this.menu[1] = {status: false}; //siglePlay
+      this.menu[2] = {status: true, x:300, y:220, width:180, height:20, string:"PLAY AGAIN"}; //battleMode
+      this.menu[3] = {status: false};//ranks
+      this.menu[4] = {status: false};//exit
+      this.menu[5] = {status: true, x:300, y:265, width:150, height:20, string:"MAIN MENU"}; //main menu
+
+    }
+
 	},
 	menuUpdate: function(){
-		for(var i=1; i<=4; i++){
-			if(this.isRectClick(this.menu[i].x,this.menu[i].y-this.menu[i].height,this.menu[i].width,this.menu[i].height)){
-				switch(i){
-					case 1: //sigle play
-					console.log("single not yet");
-					break;
-					case 2: // battle mode
-          this.menu.status = false;
-					this.battleGene();
-					break;
-					case 3: // ranks
-					console.log("rank not yet");
-					break;
-					case 4: //exit
-          this.menu.status = false;
-					this.exit();
-					break;
+		for(var i=1; i<=5; i++){
+			if(this.menu[i].status){
+        var textAlignOffset=0;
+        if(this.menu.textAlign =="center"){
+          textAlignOffset=-this.menu[i].width/2;
+        }
+        if(this.isRectClick(this.menu[i].x+textAlignOffset,this.menu[i].y-this.menu[i].height,this.menu[i].width,this.menu[i].height)){
+  				switch(i){
+  					case 1: //siglePlay
+  					console.log("single not yet");
+  					break;
+  					case 2: //battleMode
+  					console.log("battleMode");
+            this.menu.status = false;
+  					this.battleGene();
+  					break;
+  					case 3: //ranks
+  					console.log("rank not yet");
+  					break;
+  					case 4: //Game exit
+            this.menu.status = false;
+  					this.exit();
+  					break;
+  					case 5: //Game exit
+  					console.log("main");
+            this.menu.status = false;
+            this.battle.status = false;
+            this.gameOver.status = false;
+  					this.menuGene("main");
+  					break;
+          }
 				}
 			}
 		}
@@ -77,12 +108,15 @@ var bubble={
 			ctx.drawImage(this.spriteSheet, this.menu.title.sx, this.menu.title.sy, this.menu.title.width, this.menu.title.height, this.menu.title.x, this.menu.title.y, this.menu.title.width, this.menu.title.height);
 		}
 		ctx.fillStyle="rgb(255,255,255)";
-		ctx.font = this.menu[1].height+"px Arial";
 		ctx.strokeStyle="rgb(0,0,0)";
 		ctx.lineWidth=5;
-		for(var i = 1; i<= 4; i++){
-			ctx.strokeText(this.menu[i].string, this.menu[i].x, this.menu[i].y);
-			ctx.fillText(this.menu[i].string, this.menu[i].x, this.menu[i].y);
+		for(var i = 1; i<= 5; i++){
+      if(this.menu[i].status){
+        ctx.textAlign=this.menu.textAlign;
+  		  ctx.font = this.menu[i].height+"px Arial";
+  			ctx.strokeText(this.menu[i].string, this.menu[i].x, this.menu[i].y);
+  			ctx.fillText(this.menu[i].string, this.menu[i].x, this.menu[i].y);
+      }
 		}
 		ctx.restore();
 	},
@@ -423,6 +457,7 @@ var bubble={
       this.battle.bubbleData[0][j].x=x+j*32+xPosOffset;
       this.battle.bubbleData[0][j].y=y+i*28;
     }
+    this.gameOverCheck();
   },
   gameOverCheck: function(){
     switch(this.gameMode){
@@ -440,18 +475,85 @@ var bubble={
         }
       }
       if(isP1Lose&&isP2Lose){
-        this.gameOver("Draw!");
+        this.gameOverGene("Draw!");
       }else if(isP1Lose){
-        this.gameOver("Player 1 Lose!");
+        this.gameOverGene("Player 2 Win!");
       }else if(isP2Lose){
-        this.gameOver("Player 2 Lose!");
+        this.gameOverGene("Player 1 Win!");
       }
         break;
       default:
     }
   },
-  gameOver: function(str){
-    this.isGameOver = true;
+  gameOver:{
+    count:undefined,
+    COUNT_MAX:100,
+    status:undefined,
+    result:{
+      status:undefined,
+      string:undefined,
+      x:300,
+      y:150,
+      size: undefined,
+      transparent: undefined,
+    },
+    headLine:{
+      string: "GAME OVER",
+      x: 300,
+      y: 100,
+      size: undefined
+    }
+  },
+  gameOverGene: function(str){
+    this.gameOver.status = true;
+    this.gameOver.result.status = false;
+    this.gameOver.result.string=str;
+    this.gameOver.count=0;
+  },
+  gameOverUpdate: function(){
+    if(this.gameOver.count<this.gameOver.COUNT_MAX){
+      this.gameOver.count++
+      this.gameOver.headLine.size=20+this.gameOver.count*0.3;
+    }
+    if(this.gameOver.count>29 && this.gameOver.count<81){
+      if(this.gameOver.count<61){
+        this.gameOver.result.transparent=1-(60-this.gameOver.count)/30;
+//        console.log(  this.gameOver.result.transparent);
+      }
+      this.gameOver.result.status=true;
+      this.gameOver.result.size=30+this.gameOver.count*0.1;
+    }
+    if(this.gameOver.count ==70){
+      this.menuGene("battleMode");
+    }
+
+  },
+  gameOverDraw: function(){
+    ctx.save();
+		ctx.fillStyle="rgba(0,0,0,0.5)";
+		ctx.fillRect(0,0,WIDTH,HEIGHT);
+		ctx.textAlign="center";
+		ctx.font=this.gameOver.headLine.size+"px Arial";
+    ctx.strokeStyle="rgb(0,0,0)";
+    ctx.lineWidth=5;
+		ctx.strokeText(this.gameOver.headLine.string, this.gameOver.headLine.x, this.gameOver.headLine.y);
+		ctx.fillStyle="rgb(255,255,255)";
+		ctx.fillText(this.gameOver.headLine.string, this.gameOver.headLine.x, this.gameOver.headLine.y);
+
+
+    if(this.gameOver.result.status){
+      ctx.font=this.gameOver.result.size+"px Arial";
+
+      ctx.strokeStyle="rgba(0,0,0,"+this.gameOver.result.transparent+")";
+      ctx.lineWidth=5;
+  		ctx.strokeText(this.gameOver.result.string, this.gameOver.result.x, this.gameOver.result.y);
+      ctx.fillStyle="rgba(255,255,255,"+this.gameOver.result.transparent+")";
+      ctx.fillText(this.gameOver.result.string, this.gameOver.result.x, this.gameOver.result.y);
+
+    }
+
+
+    ctx.restore();
   },
   battle: {
     status:false,
@@ -490,6 +592,7 @@ var bubble={
     this.gameMode = "battleMode";
     this.numOfColumn = 14;
     this.turnCount = 0;
+    this.gameOver.status = false;
     this.battle.whoseTurn = 1;
     this.battle.whoHasControl = 1;
     this.battle.clickCount = 0;
@@ -582,7 +685,7 @@ var bubble={
     } else {
       this.battle.clickSpeed=1;
     }
-    if( bubble.isGameOver !== true){
+    if(bubble.gameOver.status !== true){
       if(keystate[KEY_LEFT]){
         this.battle.player[this.battle.whoHasControl].arrow.angle-=this.battle.clickSpeed;
         if(this.battle.player[this.battle.whoHasControl].arrow.angle < -75) this.battle.player[this.battle.whoHasControl].arrow.angle = -75;
@@ -627,10 +730,6 @@ bubbleGame.update = function(){
 			mouse.status = false;
 			bubble.click = true;
 		}
-		if(bubble.menu.status){
-			bubble.menuDraw();
-			bubble.menuUpdate();
-		}
 		if(bubble.battle.status){
 			bubble.battleDraw();
 			bubble.battleUpdate();
@@ -640,6 +739,14 @@ bubbleGame.update = function(){
 		if(bubble.bubbleMove.status){
 			bubble.bubbleMoveDraw();
 			bubble.bubbleMoveUpdate();
+		}
+		if(bubble.gameOver.status){
+			bubble.gameOverDraw();
+			bubble.gameOverUpdate();
+		}
+		if(bubble.menu.status){
+			bubble.menuDraw();
+			bubble.menuUpdate();
 		}
 	}
 	thingObj.update.call(this);
