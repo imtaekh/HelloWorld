@@ -2,34 +2,72 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
+	<link href='http://fonts.googleapis.com/css?family=Sigmar+One' rel='stylesheet' type='text/css'>
 <style>
 body {
-	margin: 0;
-	padding-top:50px;
+  margin: 0;
   text-align: center;
   color: white;
-  background-color: black;
+  background: url("src/main_bg.png"), rgb(100, 215, 255);
   font-family: helvetica;
 }
-input {
+h1{
+  font-family: 'Sigmar One', cursive;
+  font-size: 60px;
+}
+input.signUp {
   border: 0;
   padding: 10px;
   font-size: 18px;
 }
-input[type="submit"]{
+input.signUp[type="submit"]{
   background: red;
+  color: white;
+}
+input.logIn {
+  border: 0;
+  padding: 7px;
+  font-size: 10px;
+}
+input.logIn[type="submit"]{
+  border: 1px solid white;
+  background: black;
   color: white;
 }
 p {
   font-size: 15px;
 }
-
+@media only screen and (max-width: 600px) {
+  h1{
+    font-size: 45px;
+  }
+  input.signUp{
+    font-size: 15px;
+  }
+}
+@media only screen and (max-width: 375px) {
+  h1{
+    font-size: 40px;
+  }
+  input.signUp{
+    font-size: 15px;
+  }
+  input.logIn{
+    margin-bottom: 5px;
+    width: 100px;
+  }
+  input.logIn{
+    margin-bottom: 5px;
+    width: inherit;
+  }
+}
 </style>
 	<title>HelloWorld</title>
 </head>
 <body>
+  <h1> HelloWorld! </h1>
 <script>
-	var name = "noName";
+	var name = "yourName";
   var passcode = 12345;
 </script>
 <script src='helloworld.js'></script>

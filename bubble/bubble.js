@@ -166,34 +166,36 @@ var bubble={
       default:
     }
   },
-  bubbleGlue: function(){
+  bubbleGlue: function(bubbleObj){
     var shortest={xPos:null, yPos:null, distance:60};
     for(var i=0;i<this.bubbleData.length;i++){
       var offset=this.gapOffset(i);
       for(var j=0; j<this.numOfColumn+offset; j++){
         if(this.bubbleData[i][j].num===null){
-          if(distance(this.bubbleData[i][j], this.bubbleMove, "both")<shortest.distance){
-            shortest.distance =distance(this.bubbleData[i][j], this.bubbleMove, "both");
+          if(distance(this.bubbleData[i][j], bubbleObj, "both")<shortest.distance){
+            shortest.distance =distance(this.bubbleData[i][j], bubbleObj, "both");
             shortest.xPos=j;
             shortest.yPos=i;
           }
         }
       }
     }
-    dot(this.bubbleMove.x,this.bubbleMove.y,"blue");
+    dot(bubbleObj.x,bubbleObj.y,"blue");
     dot(this.bubbleData[shortest.yPos][shortest.xPos].x,this.bubbleData[shortest.yPos][shortest.xPos].y,"blue");
-    this.bubbleData[shortest.yPos][shortest.xPos].num = this.bubbleMove.num;
-    this.bubbleMove.status=false;
+    this.bubbleData[shortest.yPos][shortest.xPos].num = bubbleObj.num;
     this.bubbleAction(shortest.yPos,shortest.xPos);
-    this.fallingCheck();
-    this.bubbleReloader();
-    (this.battle.whoseTurn==1)?this.battle.whoseTurn=2:this.battle.whoseTurn=1;
-    this.turnCount++;
-    if(this.turnCount !== 0 && this.turnCount%8 == 0) {
-      this.lineAdder();
-    }
-    this.gameOverCheck();
-    oneHit(KEY_SPACE);
+  },
+  turnOver: function(){
+      this.bubbleMove.status=false;
+      this.fallingCheck();
+      this.bubbleReloader();
+      (this.battle.whoseTurn==1)?this.battle.whoseTurn=2:this.battle.whoseTurn=1;
+      this.turnCount++;
+      if(this.turnCount !== 0 && this.turnCount%8 === 0) {
+        this.lineAdder();
+      }
+      this.gameOverCheck();
+      oneHit(KEY_SPACE);
   },
   bubbleAction:function(yOrigin,xOrigin){
     var bubbleColor= Math.floor(this.bubbleData[yOrigin][xOrigin].num/3)*3;
@@ -209,7 +211,7 @@ var bubble={
         var around=this.getAroundPosInfo(yOrigin,xOrigin);
         for(var i =0; i<6; i++){
           if(around[i].y >=0 && around[i].y < 12 ){
-            var offset=this.gapOffset(i);
+            offset=this.gapOffset(i);
             if(around[i].x >=0 && around[i].x < this.numOfColumn+offset){
               if(this.bubbleData[around[i].y][around[i].x].num!== null){
                 this.bubbleData[around[i].y][around[i].x].num =15;
@@ -403,14 +405,16 @@ var bubble={
       for(var j=0; j<14+offset; j++){
         if(this.battle.bubbleData[i][j].num!==null){
           if(distance(this.battle.bubbleData[i][j], this.bubbleMove, "both")<=30){
-            this.bubbleGlue();
+            this.bubbleGlue(this.bubbleMove);
+            this.turnOver();
             return;
           }
         }
       }
     }
     if(this.bubbleMove.y-16<=17){
-      this.bubbleGlue();
+      this.bubbleGlue(this.bubbleMove);
+      this.turnOver();
       return;
     }
     this.bubbleMove.x+=this.bubbleMove.xVelocity;
@@ -447,7 +451,7 @@ var bubble={
     for(var j=0; j<this.numOfColumn+this.gapOffset(0); j++){
       this.battle.bubbleData[0][j]={};
       if(j==13 && this.battle.bubbleData[0].isGap){
-        this.battle.bubbleData[0][j].num=null
+        this.battle.bubbleData[0][j].num=null;
       } else {
         this.battle.bubbleData[0][j].num=Math.floor(Math.random()*this.bubbles.numberOfColor)*3;
       }
@@ -510,7 +514,7 @@ var bubble={
   },
   gameOverUpdate: function(){
     if(this.gameOver.count<this.gameOver.COUNT_MAX){
-      this.gameOver.count++
+      this.gameOver.count++;
       this.gameOver.headLine.size=20+this.gameOver.count*0.3;
     }
     if(this.gameOver.count>29 && this.gameOver.count<81){
@@ -617,7 +621,7 @@ var bubble={
         for(var j=0; j<14; j++){
           this.battle.bubbleData[i][j]={};
           if(j==13 && this.battle.bubbleData[i].isGap){
-            this.battle.bubbleData[i][j].num=null
+            this.battle.bubbleData[i][j].num=null;
           } else {
             this.battle.bubbleData[i][j].num=Math.floor(Math.random()*this.bubbles.numberOfColor)*3;
           }
