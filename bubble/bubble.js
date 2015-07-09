@@ -189,7 +189,7 @@ var bubble={
     this.bubbleReloader();
     (this.battle.whoseTurn==1)?this.battle.whoseTurn=2:this.battle.whoseTurn=1;
     this.turnCount++;
-    if(this.turnCount !== 0 && this.turnCount%10 == 0) {
+    if(this.turnCount !== 0 && this.turnCount%8 == 0) {
       this.lineAdder();
     }
     this.gameOverCheck();
