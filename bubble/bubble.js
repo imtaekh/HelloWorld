@@ -58,9 +58,7 @@ var bubble={
       this.menu[3] = {status: false};//ranks
       this.menu[4] = {status: false};//exit
       this.menu[5] = {status: true, x:300, y:265, width:150, height:20, string:"MAIN MENU"}; //main menu
-
     }
-
 	},
 	menuUpdate: function(){
 		for(var i=1; i<=5; i++){
@@ -690,7 +688,7 @@ var bubble={
         this.battle.player[this.battle.whoHasControl].arrow.angle-=this.battle.clickSpeed;
         if(this.battle.player[this.battle.whoHasControl].arrow.angle < -75) this.battle.player[this.battle.whoHasControl].arrow.angle = -75;
       }
-      if(keystate[KEY_RIGHT]||this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonRight.x,this.battle.player[this.battle.whoHasControl].buttonRight.y,this.battle.player[this.battle.whoHasControl].buttonRight.width,this.battle.player[this.battle.whoHasControl].buttonRight.height)){
+      if(keystate[KEY_RIGHT]){
         this.battle.player[this.battle.whoHasControl].arrow.angle+=this.battle.clickSpeed;
         if(this.battle.player[this.battle.whoHasControl].arrow.angle > 75) this.battle.player[this.battle.whoHasControl].arrow.angle = 75;
       }
@@ -714,7 +712,7 @@ var bubble={
     }
   }
 };
-var bubbleGame =  new Thing("src/things.png", 100, 250, 98, 98, null, 70);
+var bubbleGame =  new Thing("src/things.png", 50, 250, 98, 98, null, 70);
 bubble.spriteSheet = new Image();
 bubble.spriteSheet.src = "bubble/bubble.png";
 bubble.backgroundSheet = new Image();
