@@ -188,7 +188,7 @@ function update(){
 
 	player.update();
 }
-function postWAMInfo(to,name,value){
+function postInfo(to,name,value){
   var myIframe =document.createElement('iframe');
   myIframe.name = "myIframe";
   myIframe.width = 0;

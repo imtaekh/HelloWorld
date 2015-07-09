@@ -182,10 +182,11 @@ var bubble={
       type=1;
       return 16;
     } else {
-      if(this.gameMode="singleMode"){
+      console.log("what?");
+      if(this.gameMode=="singleMode"){
         type=1;
         return 16;
-      } else if(this.gameMode="battleMode") {
+      } else if(this.gameMode=="battleMode"){
         type=2;
       }
     }

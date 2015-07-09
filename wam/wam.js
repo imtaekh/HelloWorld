@@ -257,7 +257,7 @@ var wam = {
 			this.main.menu.status = false;
 			this.mainDraw();
 			this.gameOver.status = true;
-			postWAMInfo("wam/saveScore.php",name,this.score);
+			postInfo("wam/saveScore.php",name,this.score);
 			this.menuGene("gameOver");
 		}
 	},
