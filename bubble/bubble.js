@@ -221,12 +221,17 @@ var bubble={
     this.bubbleReloader();
     (this.battle.whoseTurn==1)?this.battle.whoseTurn=2:this.battle.whoseTurn=1;
     this.turnCount++;
-    if(this.turnCount !== 0 && this.turnCount%12 === 0) {
+    if(this.turnCount !== 0 && (this.turnCount+3)%12 === 0) {
+      this.shakeGene(1, 5, 30);
+    } else if(this.turnCount !== 0 && (this.turnCount+1)%12 === 0) {
+      this.shakeGene(1.5, 3, 50);
+    } else if(this.turnCount !== 0 && this.turnCount%12 === 0) {
       this.lineAdder();
+      this.shake.status = false;
     }
     if(this.bubbleFalling.count>4){
-      for(var i=0; i<this.bubbleFalling.count/4;i++){
-        var xPos=this.battle.player[this.battle.whoseTurn].borderLeft+(Math.random()*230);
+      for(var i=0; i<(this.bubbleFalling.count-4)/4;i++){
+        var xPos=this.battle.player[this.battle.whoseTurn].borderLeft+(Math.random()*220);
         this.obstacleBubbleGene(xPos);
       }
     }
@@ -397,7 +402,7 @@ var bubble={
   obstacleBubbleGene: function(xOrigin){
     for(var i=0; i<100; i++){
       if(this.obstacleBubble[i]===undefined){
-        this.obstacleBubble[i]={id:i,num:99,x:xOrigin,y:HEIGHT-30,yValocity:-4,xValocity:0};
+        this.obstacleBubble[i]={id:i,num:99,xOrigin:xOrigin,x:xOrigin,y:HEIGHT+30+(Math.random()*50-25),yValocity:-2,xValocity:(Math.random()*4-2)};
         break;
       }
     }
@@ -407,7 +412,10 @@ var bubble={
       if(this.obstacleBubble[i]!==undefined){
         this.obstacleBubble[i].y+=this.obstacleBubble[i].yValocity;
         this.obstacleBubble[i].x+=this.obstacleBubble[i].xValocity;
-        this.obstacleBubble[i].yValocity-=gravity;
+        this.obstacleBubble[i].yValocity-=gravity*2;
+        if(this.obstacleBubble[i].x<this.obstacleBubble[i].xOrigin-5 || this.obstacleBubble[i].x>this.obstacleBubble[i].xOrigin+5){
+          this.obstacleBubble[i].xValocity*= -1;
+        }
         this.bubbleGlueCheck(this.obstacleBubble[i]);
       }
     }
@@ -713,25 +721,57 @@ var bubble={
     }
     oneHit(KEY_SPACE);
   },
+  shake:{
+    status: false,
+    offset: 0,
+    count: undefined,
+    power: undefined,
+    duration: undefined,
+    COUNT_MAX: 100
+  },
+  shakeGene: function(power, speed, duration){
+    this.shake.status = true;
+    this.shake.offset = 0;
+    this.shake.power = power;
+    this.shake.speed = speed;
+    this.shake.duration = duration;
+    this.shake.count = 100;
+  },
+  shakeUpdate: function(){
+    if(this.shake.count>0){
+      this.shake.count--;
+    } else {
+      this.shake.count = this.shake.COUNT_MAX;
+    }
+    if(this.shake.count<this.shake.duration && this.shake.count%this.shake.speed === 0){
+      this.shake.offset=(this.shake.offset==this.shake.power)?(-this.shake.power):(this.shake.power);
+    } else {
+      this.shake.offset=0;
+    }
+  },
   battleDraw: function(){
-    //black background & gamebBackground
+    //black background & gamebBackground & stage frame
     ctx.fillStyle = "rgba(0,0,0,0.7)";
     ctx.fillRect(0,0,WIDTH,HEIGHT);
     ctx.drawImage(this.backgroundSheet, this.battle.background[this.battle.background.num].sx, this.battle.background[this.battle.background.num].sy, this.battle.background[this.battle.background.num].width, this.battle.background[this.battle.background.num].height, this.battle.background[this.battle.background.num].x, this.battle.background[this.battle.background.num].y, this.battle.background[this.battle.background.num].width*2, this.battle.background[this.battle.background.num].height*2);
     (this.battle.whoseTurn == 1)?
     ctx.drawImage(this.spriteSheet, 474, 96, 2, 370, 315, 15, 2, 370):
     ctx.drawImage(this.spriteSheet, 478, 96, 2, 370, 283, 15, 2, 370);
+    ctx.drawImage(this.spriteSheet, this.battle.gameFrame.sx, this.battle.gameFrame.sy, this.battle.gameFrame.width, this.battle.gameFrame.height, this.battle.gameFrame.x, this.battle.gameFrame.y, this.battle.gameFrame.width, this.battle.gameFrame.height);
+
     //gameBubbles
+    var shakeOffset=0;
+    if(this.shake.status){
+      shakeOffset=this.shake.offset;
+    }
     for(var i=0;i<this.battle.bubbleData.length;i++){
       var offset = this.gapOffset(i);
       for(var j=0; j<14+offset; j++){
         if(this.battle.bubbleData[i][j].num!==null){
-          ctx.drawImage(this.spriteSheet, this.bubbles[this.battle.bubbleData[i][j].num].sx, this.bubbles[this.battle.bubbleData[i][j].num].sy, this.bubbles.width, this.bubbles.height, this.battle.bubbleData[i][j].x-16, this.battle.bubbleData[i][j].y-16, this.bubbles.width, this.bubbles.height);
+          ctx.drawImage(this.spriteSheet, this.bubbles[this.battle.bubbleData[i][j].num].sx, this.bubbles[this.battle.bubbleData[i][j].num].sy, this.bubbles.width, this.bubbles.height, this.battle.bubbleData[i][j].x-16+shakeOffset, this.battle.bubbleData[i][j].y-16, this.bubbles.width, this.bubbles.height);
         }
       }
     }
-    //stage setting
-    ctx.drawImage(this.spriteSheet, this.battle.gameFrame.sx, this.battle.gameFrame.sy, this.battle.gameFrame.width, this.battle.gameFrame.height, this.battle.gameFrame.x, this.battle.gameFrame.y, this.battle.gameFrame.width, this.battle.gameFrame.height);
     //player[1] arrow & bubbles
     ctx.save();
     ctx.translate(this.battle.player[1].arrow.x+8,this.battle.player[1].arrow.y+44);
@@ -804,6 +844,9 @@ bubbleGame.update = function(){
 		if(bubble.battle.status){
 			bubble.battleDraw();
 			bubble.battleUpdate();
+		}
+		if(bubble.shake.status){
+			bubble.shakeUpdate();
 		}
 		if(bubble.bubbleMove.status){
 			bubble.bubbleMoveDraw();
