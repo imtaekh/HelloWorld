@@ -185,6 +185,25 @@ var bubble={
     this.bubbleData[shortest.yPos][shortest.xPos].num = bubbleObj.num;
     this.bubbleAction(shortest.yPos,shortest.xPos);
   },
+  bubbleGlueCheck: function(bubbleObj){
+    for(var i=0;i<this.battle.bubbleData.length;i++){
+      var offset = this.gapOffset(i);
+      for(var j=0; j<14+offset; j++){
+        if(this.battle.bubbleData[i][j].num!==null){
+          if(distance(this.battle.bubbleData[i][j], bubbleObj, "both")<=30){
+            this.bubbleGlue(bubbleObj);
+            this.turnOver();
+            return;
+          }
+        }
+      }
+    }
+    if(bubbleObj.y-16<=17){
+      this.bubbleGlue(bubbleObj);
+      this.turnOver();
+      return;
+    }
+  },
   turnOver: function(){
       this.bubbleMove.status=false;
       this.fallingCheck();
@@ -400,23 +419,7 @@ var bubble={
       this.bubbleMove.x=this.bubbleMove.borderRight-16;
       this.bubbleMove.xVelocity*=(-1);
     }
-    for(var i=0;i<this.battle.bubbleData.length;i++){
-      var offset = this.gapOffset(i);
-      for(var j=0; j<14+offset; j++){
-        if(this.battle.bubbleData[i][j].num!==null){
-          if(distance(this.battle.bubbleData[i][j], this.bubbleMove, "both")<=30){
-            this.bubbleGlue(this.bubbleMove);
-            this.turnOver();
-            return;
-          }
-        }
-      }
-    }
-    if(this.bubbleMove.y-16<=17){
-      this.bubbleGlue(this.bubbleMove);
-      this.turnOver();
-      return;
-    }
+    this.bubbleGlueCheck(this.bubbleMove);
     this.bubbleMove.x+=this.bubbleMove.xVelocity;
     this.bubbleMove.y+=this.bubbleMove.yVelocity;
   },
