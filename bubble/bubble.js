@@ -142,6 +142,7 @@ var bubble={
     15:{color: 5, sx:180, sy:482, special:null},
     16:{color: 5, sx:180, sy:518, special:"bomb"},
     17:{color: 5, sx:180, sy:554, special:"colorChange"},
+    99:{color: 99, sx:0, sy:590, special:"obstacle"},
   },
   bubbleGenerator: function(){
     var randNum=Math.random();
@@ -180,7 +181,7 @@ var bubble={
         }
       }
     }
-    dot(bubbleObj.x,bubbleObj.y,"blue");
+    dot(bubbleObj.x,bubbleObj.y,"red");
     dot(this.bubbleData[shortest.yPos][shortest.xPos].x,this.bubbleData[shortest.yPos][shortest.xPos].y,"blue");
     this.bubbleData[shortest.yPos][shortest.xPos].num = bubbleObj.num;
     this.bubbleAction(shortest.yPos,shortest.xPos);
@@ -191,17 +192,25 @@ var bubble={
       for(var j=0; j<14+offset; j++){
         if(this.battle.bubbleData[i][j].num!==null){
           if(distance(this.battle.bubbleData[i][j], bubbleObj, "both")<=30){
-            this.bubbleGlue(bubbleObj);
-            this.turnOver();
+            dot(this.battle.bubbleData[i][j].x,this.battle.bubbleData[i][j].y,"blue");
+            dot(bubbleObj.x,bubbleObj.y,"red");
+            glueIt(this);
             return;
           }
         }
       }
     }
     if(bubbleObj.y-16<=17){
-      this.bubbleGlue(bubbleObj);
-      this.turnOver();
+      glueIt(this);
       return;
+    }
+    function glueIt(pointer){
+      pointer.bubbleGlue(bubbleObj);
+      if(bubbleObj.id !== undefined){
+        delete pointer.obstacleBubble[bubbleObj.id]
+      }else if(pointer.bubbleMove.status){
+        pointer.turnOver();
+      }
     }
   },
   turnOver: function(){
@@ -350,6 +359,32 @@ var bubble={
             this.unattachedCheckRecursive(around[i].y,around[i].x);
           }
         }
+      }
+    }
+  },
+  obstacleBubble: {},
+  obstacleBubbleGene: function(xOrigin){
+    for(var i=0; i<100; i++){
+      if(this.obstacleBubble[i]===undefined){
+        this.obstacleBubble[i]={id:i,num:99,x:xOrigin,y:HEIGHT-30,yValocity:-4,xValocity:0};
+        break;
+      }
+    }
+  },
+  obstacleBubbleUpdate: function(){
+    for(var i=0; i<100; i++){
+      if(this.obstacleBubble[i]!==undefined){
+        this.obstacleBubble[i].y+=this.obstacleBubble[i].yValocity;
+        this.obstacleBubble[i].x+=this.obstacleBubble[i].xValocity;
+        this.obstacleBubble[i].yValocity-=gravity;
+        this.bubbleGlueCheck(this.obstacleBubble[i]);
+      }
+    }
+  },
+  obstacleBubbleDraw: function(){
+    for(var i=0; i<100; i++){
+      if(this.obstacleBubble[i]!==undefined){
+        ctx.drawImage(this.spriteSheet, this.bubbles[this.obstacleBubble[i].num].sx, this.bubbles[this.obstacleBubble[i].num].sy, this.bubbles.width, this.bubbles.height, this.obstacleBubble[i].x-16, this.obstacleBubble[i].y-16, this.bubbles.width, this.bubbles.height);
       }
     }
   },
@@ -686,6 +721,10 @@ var bubble={
     ctx.drawImage(this.spriteSheet, this.battle.player[this.battle.whoseTurn].buttonShoot.sx, this.battle.player[this.battle.whoseTurn].buttonShoot.sy, this.battle.player[this.battle.whoseTurn].buttonShoot.width, this.battle.player[this.battle.whoseTurn].buttonShoot.height, this.battle.player[this.battle.whoseTurn].buttonShoot.x, this.battle.player[this.battle.whoseTurn].buttonShoot.y, this.battle.player[this.battle.whoseTurn].buttonShoot.width, this.battle.player[this.battle.whoseTurn].buttonShoot.height);
   },
   battleUpdate: function(){
+    this.bubbleFallingDraw();
+    this.bubbleFallingUpdate();
+    this.obstacleBubbleDraw();
+    this.obstacleBubbleUpdate();
     if(bubble.gameOver.status !== true){
       if(this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonLeft.x,this.battle.player[this.battle.whoHasControl].buttonLeft.y,this.battle.player[this.battle.whoHasControl].buttonLeft.width,this.battle.player[this.battle.whoHasControl].buttonLeft.height)){
         (this.battle.leftButtonToggle)?this.battle.leftButtonToggle=false:this.battle.leftButtonToggle=true;
@@ -732,8 +771,6 @@ bubbleGame.update = function(){
 		if(bubble.battle.status){
 			bubble.battleDraw();
 			bubble.battleUpdate();
-      bubble.bubbleFallingDraw();
-      bubble.bubbleFallingUpdate();
 		}
 		if(bubble.bubbleMove.status){
 			bubble.bubbleMoveDraw();
