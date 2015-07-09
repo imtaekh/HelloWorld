@@ -563,8 +563,8 @@ var bubble={
     gameFrame: { x:64, y:3, sx:0, sy:84, width:472, height:394 },
     whoseTurn: undefined,
     whoHasControl: undefined,
-    clickCount: undefined,
-    clickSpeed: 1,
+    leftButtonToggle: undefined,
+    rightButtonToggle: undefined,
     player: {
       1:{
         arrow: { angle: 0, x:180, y:299+4, sx:216, sy:482, width:16, height:80 },
@@ -593,7 +593,8 @@ var bubble={
     this.gameOver.status = false;
     this.battle.whoseTurn = 1;
     this.battle.whoHasControl = 1;
-    this.battle.clickCount = 0;
+    this.battle.leftButtonToggle = false;
+    this.battle.rightButtonToggle = false;
     this.battle.background.num=Math.floor(Math.random()*this.battle.background.maxNum);
     this.battle.player[1].curBubble.num=this.bubbleGenerator();
     this.battle.player[1].nextBubble.num=this.bubbleGenerator();
@@ -678,36 +679,29 @@ var bubble={
     ctx.drawImage(this.spriteSheet, this.battle.player[this.battle.whoseTurn].buttonShoot.sx, this.battle.player[this.battle.whoseTurn].buttonShoot.sy, this.battle.player[this.battle.whoseTurn].buttonShoot.width, this.battle.player[this.battle.whoseTurn].buttonShoot.height, this.battle.player[this.battle.whoseTurn].buttonShoot.x, this.battle.player[this.battle.whoseTurn].buttonShoot.y, this.battle.player[this.battle.whoseTurn].buttonShoot.width, this.battle.player[this.battle.whoseTurn].buttonShoot.height);
   },
   battleUpdate: function(){
-    if(this.battle.clickCount>0){
-      this.battle.clickCount--;
-    } else {
-      this.battle.clickSpeed=1;
-    }
     if(bubble.gameOver.status !== true){
-      if(keystate[KEY_LEFT]){
-        this.battle.player[this.battle.whoHasControl].arrow.angle-=this.battle.clickSpeed;
-        if(this.battle.player[this.battle.whoHasControl].arrow.angle < -75) this.battle.player[this.battle.whoHasControl].arrow.angle = -75;
-      }
-      if(keystate[KEY_RIGHT]){
-        this.battle.player[this.battle.whoHasControl].arrow.angle+=this.battle.clickSpeed;
-        if(this.battle.player[this.battle.whoHasControl].arrow.angle > 75) this.battle.player[this.battle.whoHasControl].arrow.angle = 75;
-      }
       if(this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonLeft.x,this.battle.player[this.battle.whoHasControl].buttonLeft.y,this.battle.player[this.battle.whoHasControl].buttonLeft.width,this.battle.player[this.battle.whoHasControl].buttonLeft.height)){
-        this.battle.player[this.battle.whoHasControl].arrow.angle-=this.battle.clickSpeed;
-        if(this.battle.player[this.battle.whoHasControl].arrow.angle < -75) this.battle.player[this.battle.whoHasControl].arrow.angle = -75;
-        this.battle.clickCount=20;
-        this.battle.clickSpeed++;
+        (this.battle.leftButtonToggle)?this.battle.leftButtonToggle=false:this.battle.leftButtonToggle=true;
+        this.battle.rightButtonToggle=false;
       }
       if(this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonRight.x,this.battle.player[this.battle.whoHasControl].buttonRight.y,this.battle.player[this.battle.whoHasControl].buttonRight.width,this.battle.player[this.battle.whoHasControl].buttonRight.height)){
-        this.battle.player[this.battle.whoHasControl].arrow.angle+=this.battle.clickSpeed;
+        (this.battle.rightButtonToggle)?this.battle.rightButtonToggle=false:this.battle.rightButtonToggle=true;
+        this.battle.leftButtonToggle=false;
+      }
+      if(this.battle.leftButtonToggle||keystate[KEY_LEFT]){
+        this.battle.player[this.battle.whoHasControl].arrow.angle-=1;
+        if(this.battle.player[this.battle.whoHasControl].arrow.angle < -75) this.battle.player[this.battle.whoHasControl].arrow.angle = -75;
+      }
+      if(this.battle.rightButtonToggle||keystate[KEY_RIGHT]){
+        this.battle.player[this.battle.whoHasControl].arrow.angle+=1;
         if(this.battle.player[this.battle.whoHasControl].arrow.angle > 75) this.battle.player[this.battle.whoHasControl].arrow.angle = 75;
-        this.battle.clickCount=20;
-        this.battle.clickSpeed++;
       }
       if(this.bubbleMove.status===false &&(oneHit(KEY_SPACE)|| this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonShoot.x,this.battle.player[this.battle.whoHasControl].buttonShoot.y,this.battle.player[this.battle.whoHasControl].buttonShoot.width,this.battle.player[this.battle.whoHasControl].buttonShoot.height))){
         this.battle.player[this.battle.whoHasControl].curBubble.isShow=false;
         this.bubbleMoveGene();
         (this.battle.whoHasControl==1)?this.battle.whoHasControl=2:this.battle.whoHasControl=1;
+        this.battle.rightButtonToggle=false;
+        this.battle.leftButtonToggle=false;
       }
     }
   }
