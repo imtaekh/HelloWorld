@@ -903,7 +903,7 @@ var bubble={
     background: {
       num: undefined,
       maxNum: 1,
-      0:{ x:76, y:15, sx:0, sy:0, width:128, height:186 }
+      0:{ x:76, y:15, sx:35, sy:0, width:128, height:186 }
     },
     gameFrame: { x:64, y:3, sx:482, sy:84, width:280, height:394 },
     leftButtonToggle: undefined,
@@ -1151,7 +1151,6 @@ var bubble={
 		this.rank.scoreIframe.style.position="absolute";
 		this.rank.scoreIframe.style.top=canvas.offsetTop+canvas.offsetHeight*0.1+"px";
 		this.rank.scoreIframe.style.left=canvas.offsetLeft+canvas.offsetWidth*0.1+"px";
-
 		this.rank.scoreIframe.style.width=canvas.offsetWidth*0.5+"px";
 		this.rank.scoreIframe.style.height=canvas.offsetHeight*0.8+"px";
 
