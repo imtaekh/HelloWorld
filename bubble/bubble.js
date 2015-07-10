@@ -242,7 +242,8 @@ var bubble={
       var offset = this.gapOffset(i);
       for(var j=0; j<this.numOfColumn+offset; j++){
         if(this.bubbleData[i][j].num!==null){
-          if(distance(this.bubbleData[i][j], bubbleObj, "both")<=30){
+          if(distance(this.bubbleData[i][j], bubbleObj, "both")<=20||(distance(this.bubbleData[i][j], bubbleObj, "both")<=30 && Math.abs(this.bubbleMove.xVelocity/this.bubbleMove.yVelocity-(this.bubbleMove.x-this.bubbleData[i][j].x)/(this.bubbleMove.y-this.bubbleData[i][j].y))<=0.7)){
+          console.log(Math.abs(this.bubbleMove.xVelocity/this.bubbleMove.yVelocity-(this.bubbleMove.x-this.bubbleData[i][j].x)/(this.bubbleMove.y-this.bubbleData[i][j].y)));
 //            dot(this.bubbleData[i][j].x,this.bubbleData[i][j].y,"blue");
 //            dot(bubbleObj.x,bubbleObj.y,"red");
             glueIt(this);
@@ -303,7 +304,9 @@ var bubble={
       case "colorChange":
         var offset=this.gapOffset(yOrigin);
         for(var j=0;j<this.numOfColumn+offset;j++){
-          this.bubbleData[yOrigin][j].num=bubbleColor;
+          if(j<xOrigin+4 && j > xOrigin-4){
+            this.bubbleData[yOrigin][j].num=bubbleColor;
+          }
         }
         break;
       case "bomb":
