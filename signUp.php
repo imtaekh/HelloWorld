@@ -25,7 +25,8 @@ if(strlen($yourName)>=4 && strlen($yourName)<=20){
 			shuffle($seed);
 			$passcode = '';
 			foreach (array_rand($seed, 5) as $k) $passcode .= $seed[$k];
-			$sql  = "INSERT INTO game1 (name, passcode, score) VALUES ( '{$yourName}',$passcode, 0)";
+//			$sql  = "INSERT INTO game1 (name, passcode, score) VALUES ( '{$yourName}',$passcode, 0)";
+			$sql  = "INSERT INTO game1 (name, passcode) VALUES ( '{$yourName}',$passcode)";
 			if ($conn->query($sql) === TRUE) {
 			} else {
 			   die( "Error updating record: " . $conn->error);
