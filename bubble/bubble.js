@@ -70,7 +70,7 @@ var bubble={
         this.menu[4] = {status: false};//exit
         this.menu[5] = {status: true, x:300, y:265, width:150, height:20, string:"MAIN MENU"}; //main menu
         break;
-      case "game":
+      case "exitSingle":
         this.menu.background = false;
         this.menu.title.status = false;
         this.menu.textAlign = "center";
@@ -78,7 +78,17 @@ var bubble={
         this.menu[2] = {status: false};//battleMode
         this.menu[3] = {status: false};//ranks
         this.menu[4] = {status: false};//exit
-        this.menu[5] = {status: true, x:300, y:265, width:150, height:20, string:"BACK"}; //main menu
+        this.menu[5] = {status: true, x:373, y:325, width:50, height:20, string:"EXIT"}; //main menu
+        break;
+      case "exitBattle":
+        this.menu.background = false;
+        this.menu.title.status = false;
+        this.menu.textAlign = "center";
+        this.menu[1] = {status: false}; //siglePlay
+        this.menu[2] = {status: false};//battleMode
+        this.menu[3] = {status: false};//ranks
+        this.menu[4] = {status: false};//exit
+        this.menu[5] = {status: true, x:567, y:325, width:50, height:20, string:"EXIT"}; //main menu
         break;
     }
 	},
@@ -93,20 +103,21 @@ var bubble={
   				switch(i){
   					case 1: //siglePlay
   					console.log("singleMode");
-              this.menu.status = false;
+              this.menuGene("exitSingle");
               this.battle.status = false;
               this.single.status = false;
     					this.singleGene();
     					break;
   					case 2: //battleMode
     					console.log("battleMode");
-              this.menu.status = false;
+    					this.menuGene("exitBattle");
               this.battle.status = false;
               this.single.status = false;
     					this.battleGene();
     					break;
   					case 3: //ranks
-    					console.log("rank not yet");
+    					console.log("rank");
+              this.rankGene();
     					break;
   					case 4: //Game exit
               this.menu.status = false;
@@ -649,6 +660,9 @@ var bubble={
     this.gameOver.result.string = str;
     this.gameOver.headLine.size = 0;
     this.gameOver.count = 0;
+    if(this.gameMode=="singleMode"){
+      postInfo("bubble/saveScore.php",name,this.single.player.score);
+    }
   },
   gameOverUpdate: function(){
     if(this.gameOver.count<this.gameOver.COUNT_MAX){
@@ -1112,6 +1126,56 @@ var bubble={
 		ctx.fillText(this.countdown.string, this.countdown.x, this.countdown.y);
 		ctx.restore();
 	},
+	rank:{
+		status:false,
+		scoreDiv: undefined,
+		scoreIframe: undefined,
+		menu: {x:380, y:320, width:80, height:25, string:"RETURN"}
+	},
+	rankGene: function(){
+		this.menu.status=false;
+		this.gameOver.status=false;
+		this.rank.status=true;
+		this.rank.scoreDiv=document.createElement("div");
+		this.rank.scoreDiv.style.position="absolute";
+		this.rank.scoreDiv.style.top=canvas.offsetTop+canvas.offsetHeight*0.1+"px";
+		this.rank.scoreDiv.style.left=canvas.offsetLeft+canvas.offsetWidth*0.1+"px";
+		this.rank.scoreDiv.style.width=canvas.offsetWidth*0.5+"px";
+		this.rank.scoreDiv.style.height=canvas.offsetHeight*0.8+"px";
+  		document.body.appendChild(this.rank.scoreDiv);
+  		this.rank.scoreDiv.innerHTML="<br>Loading.. It may take 3~5 seconds.";
+
+		this.rank.scoreIframe=document.createElement("iframe");
+		this.rank.scoreIframe.src="bubble/listScore.php"
+		this.rank.scoreIframe.style.position="absolute";
+		this.rank.scoreIframe.style.top=canvas.offsetTop+canvas.offsetHeight*0.1+"px";
+		this.rank.scoreIframe.style.left=canvas.offsetLeft+canvas.offsetWidth*0.1+"px";
+
+		this.rank.scoreIframe.style.width=canvas.offsetWidth*0.5+"px";
+		this.rank.scoreIframe.style.height=canvas.offsetHeight*0.8+"px";
+
+  		document.body.appendChild(this.rank.scoreIframe);
+	},
+	rankUpdate: function(){
+		if(this.isRectClick(this.rank.menu.x,this.rank.menu.y-this.rank.menu.height,this.rank.menu.width,this.rank.menu.height)){
+			this.rank.status=false;
+			this.rank.scoreDiv.remove();
+			this.rank.scoreIframe.remove();
+			this.menuGene("gameStart");
+		}
+	},
+	rankDraw: function(){
+		ctx.save();
+		ctx.fillStyle = "rgba(0,0,0,0.7)";
+		ctx.fillRect(0,0,WIDTH,HEIGHT);
+		ctx.font = this.rank.menu.height+"px Arial";
+		ctx.strokeStyle="rgb(0,0,0)"
+		ctx.lineWidth=5;
+		ctx.fillStyle="rgb(255,255,255)";
+		ctx.strokeText(this.rank.menu.string, this.rank.menu.x, this.rank.menu.y);
+		ctx.fillText(this.rank.menu.string, this.rank.menu.x, this.rank.menu.y);
+		ctx.restore();
+	},
 };
 var bubbleGame =  new Thing("src/things.png", 50, 250, 98, 98, null, 70);
 bubble.spriteSheet = new Image();
@@ -1151,6 +1215,10 @@ bubbleGame.update = function(){
 		if(bubble.menu.status){
 			bubble.menuDraw();
 			bubble.menuUpdate();
+		}
+		if(bubble.rank.status){
+			bubble.rankDraw();
+			bubble.rankUpdate();
 		}
 	}
 	thingObj.update.call(this);
