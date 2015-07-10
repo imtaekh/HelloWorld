@@ -274,6 +274,7 @@ var bubble={
     this.fallingCheck();
     this.bubbleReloader();
     this.turnCount++;
+    var turnCicle = (this.gameMode=="battleMode")?9:5;
     if(this.turnCount !== 0 && (this.turnCount+3)%9 === 0) {
       this.shakeGene(1, 5, 30);
     } else if(this.turnCount !== 0 && (this.turnCount+1)%9 === 0) {
