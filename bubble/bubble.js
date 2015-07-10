@@ -66,9 +66,9 @@ var bubble={
         this.menu.textAlign = "center";
         this.menu[1] = {status: true, x:300, y:220, width:180, height:20, string:"PLAY AGAIN"}; //siglePlay
         this.menu[2] = {status: false};//battleMode
-        this.menu[3] = {status: false};//ranks
+        this.menu[3] = {status: true, x:300, y:265, width:150, height:20, string:"RANKS"};//ranks
         this.menu[4] = {status: false};//exit
-        this.menu[5] = {status: true, x:300, y:265, width:150, height:20, string:"MAIN MENU"}; //main menu
+        this.menu[5] = {status: true, x:300, y:310, width:150, height:20, string:"MAIN MENU"}; //main menu
         break;
       case "exitSingle":
         this.menu.background = false;
@@ -102,29 +102,32 @@ var bubble={
         if(this.isRectClick(this.menu[i].x+textAlignOffset,this.menu[i].y-this.menu[i].height,this.menu[i].width,this.menu[i].height)){
   				switch(i){
   					case 1: //siglePlay
-  					console.log("singleMode");
               this.menuGene("exitSingle");
               this.battle.status = false;
               this.single.status = false;
     					this.singleGene();
     					break;
   					case 2: //battleMode
-    					console.log("battleMode");
     					this.menuGene("exitBattle");
               this.battle.status = false;
               this.single.status = false;
     					this.battleGene();
     					break;
   					case 3: //ranks
-    					console.log("rank");
+              this.battle.status = false;
+              this.single.status = false;
               this.rankGene();
     					break;
   					case 4: //Game exit
+              this.battle.status = false;
+              this.single.status = false;
               this.menu.status = false;
     					this.exit();
     					break;
   					case 5: //Game exit
-    					console.log("main");
+    					if(this.gameMode=="singleMode"){
+                postInfo("bubble/saveScore.php",name,this.single.player.score);
+              }
               this.menu.status = false;
               this.battle.status = false;
               this.single.status = false;
@@ -193,7 +196,6 @@ var bubble={
       type=1;
       return 16;
     } else {
-      console.log("what?");
       if(this.gameMode=="singleMode"){
         type=1;
         return 16;
@@ -231,8 +233,6 @@ var bubble={
         }
       }
     }
-    dot(bubbleObj.x,bubbleObj.y,"red");
-    dot(this.bubbleData[this.TargetPosition.yPos][this.TargetPosition.xPos].x,this.bubbleData[this.TargetPosition.yPos][this.TargetPosition.xPos].y,"blue");
     this.bubbleData[this.TargetPosition.yPos][this.TargetPosition.xPos].num = bubbleObj.num;
     this.bubbleData[this.TargetPosition.yPos][this.TargetPosition.xPos].obstacleChecked = false;
     this.bubbleAction(this.TargetPosition.yPos,this.TargetPosition.xPos);
@@ -243,8 +243,8 @@ var bubble={
       for(var j=0; j<this.numOfColumn+offset; j++){
         if(this.bubbleData[i][j].num!==null){
           if(distance(this.bubbleData[i][j], bubbleObj, "both")<=30){
-            dot(this.bubbleData[i][j].x,this.bubbleData[i][j].y,"blue");
-            dot(bubbleObj.x,bubbleObj.y,"red");
+//            dot(this.bubbleData[i][j].x,this.bubbleData[i][j].y,"blue");
+//            dot(bubbleObj.x,bubbleObj.y,"red");
             glueIt(this);
             return;
           }
@@ -293,7 +293,6 @@ var bubble={
       }
       this.single.player.score += this.bubbleFalling.count*100;
     }
-    console.log(this.bubbleFalling.count);
     this.bubbleFalling.count=0;
     this.gameOverCheck();
     oneHit(KEY_SPACE);
@@ -357,7 +356,6 @@ var bubble={
       if(around[i].y >=0 && around[i].y < 12 ){
         var offset=this.gapOffset(around[i].y);
         if(around[i].x >=0 && around[i].x < this.numOfColumn+offset){
-          dot(this.bubbleData[around[i].y][around[i].x].x,this.bubbleData[around[i].y][around[i].x].y,"yellow");
           if(this.bubbleData[around[i].y][around[i].x].num==this.bubbleData[yOrigin][xOrigin].num && this.bubbleData[around[i].y][around[i].x].isFalling === false){
             this.bubbleCheck(around[i].y,around[i].x);
           }
@@ -373,7 +371,6 @@ var bubble={
       if(around[i].y >=0 && around[i].y < 12 ){
         var offset=this.gapOffset(around[i].y);
         if(around[i].x >=0 && around[i].x < this.numOfColumn+offset){
-          dot(this.bubbleData[around[i].y][around[i].x].x,this.bubbleData[around[i].y][around[i].x].y,"yellow");
           if(this.bubbleData[around[i].y][around[i].x].num==this.bubbleData[yOrigin][xOrigin].num && this.bubbleData[around[i].y][around[i].x].obstacleChecked === false){
             this.obstacleCheck(around[i].y,around[i].x);
           }
@@ -440,8 +437,6 @@ var bubble={
     this.fallingProvoke();
   },
   unattachedCheckRecursive: function(yOrigin,xOrigin){
-  //  dot(this.bubbleData[yOrigin][xOrigin].x,this.bubbleData[yOrigin][xOrigin].y,"blue");
-
     this.bubbleData[yOrigin][xOrigin].isFalling=false;
     var around=this.getAroundPosInfo(yOrigin,xOrigin);
 
@@ -781,9 +776,11 @@ var bubble={
     this.battle.player[1].curBubble.num=this.bubbleGenerator();
     this.battle.player[1].nextBubble.num=this.bubbleGenerator();
     this.battle.player[1].score=0;
+    this.battle.player[1].arrow.angle=0
     this.battle.player[2].curBubble.num=this.bubbleGenerator();
     this.battle.player[2].nextBubble.num=this.bubbleGenerator();
     this.battle.player[2].score=0;
+    this.battle.player[2].arrow.angle=0;
     this.battle.bubbleData=new Array(12);
     for(var i=0;i<this.battle.bubbleData.length;i++){
       this.battle.bubbleData[i]={};
@@ -830,10 +827,9 @@ var bubble={
     ctx.fillRect(0,0,WIDTH,HEIGHT);
     ctx.drawImage(this.backgroundSheet, this.battle.background[this.battle.background.num].sx, this.battle.background[this.battle.background.num].sy, this.battle.background[this.battle.background.num].width, this.battle.background[this.battle.background.num].height, this.battle.background[this.battle.background.num].x, this.battle.background[this.battle.background.num].y, this.battle.background[this.battle.background.num].width*2, this.battle.background[this.battle.background.num].height*2);
     (this.battle.whoseTurn == 1)?
-    ctx.drawImage(this.spriteSheet, 474, 96, 2, 370, 315, 15, 2, 370):
-    ctx.drawImage(this.spriteSheet, 478, 96, 2, 370, 283, 15, 2, 370);
+      ctx.drawImage(this.spriteSheet, 474, 96, 2, 370, 315, 15, 2, 370):
+      ctx.drawImage(this.spriteSheet, 478, 96, 2, 370, 283, 15, 2, 370);
     ctx.drawImage(this.spriteSheet, this.battle.gameFrame.sx, this.battle.gameFrame.sy, this.battle.gameFrame.width, this.battle.gameFrame.height, this.battle.gameFrame.x, this.battle.gameFrame.y, this.battle.gameFrame.width, this.battle.gameFrame.height);
-
     //gameBubbles
     var shakeOffset=0;
     if(this.shake.status && this.gameOver.status !== true){
@@ -956,6 +952,7 @@ var bubble={
   },
   singleGene: function(){
     this.single.status = true;
+    this.countdown.status = false;
     this.gameMode = "singleMode";
     this.numOfColumn = 8;
     this.turnCount = 0;
@@ -967,6 +964,7 @@ var bubble={
     this.single.background.num=Math.floor(Math.random()*this.single.background.maxNum);
     this.single.player.curBubble.num=this.bubbleGenerator();
     this.single.player.nextBubble.num=this.bubbleGenerator();
+    this.single.player.arrow.angle=0;
     this.single.player.score=0;
     this.single.bubbleData=new Array(12);
     for(var i=0;i<this.single.bubbleData.length;i++){
@@ -1133,8 +1131,8 @@ var bubble={
 		menu: {x:380, y:320, width:80, height:25, string:"RETURN"}
 	},
 	rankGene: function(){
-		this.menu.status=false;
 		this.gameOver.status=false;
+  	this.menu.status=false;
 		this.rank.status=true;
 		this.rank.scoreDiv=document.createElement("div");
 		this.rank.scoreDiv.style.position="absolute";
@@ -1161,7 +1159,7 @@ var bubble={
 			this.rank.status=false;
 			this.rank.scoreDiv.remove();
 			this.rank.scoreIframe.remove();
-			this.menuGene("gameStart");
+      this.menuGene("main");
 		}
 	},
 	rankDraw: function(){
@@ -1177,7 +1175,7 @@ var bubble={
 		ctx.restore();
 	},
 };
-var bubbleGame =  new Thing("src/things.png", 50, 250, 98, 98, null, 70);
+var bubbleGame =  new Thing("src/things.png", 600, 250, 98, 98, null, 70);
 bubble.spriteSheet = new Image();
 bubble.spriteSheet.src = "bubble/bubble.png";
 bubble.backgroundSheet = new Image();

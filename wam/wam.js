@@ -239,6 +239,7 @@ var wam = {
 			}
 		}
 		if(this.isRectClick(this.main.menu.x,this.main.menu.y-this.main.menu.height,this.main.menu.width,this.main.menu.height)){
+			postInfo("wam/saveScore.php",name,this.score);
 			this.main.status=false;
 			this.menuGene("gameStart");
 		}
@@ -598,7 +599,7 @@ var wam = {
 	}
 }
 
-var wamGame =  new Thing("src/things.png", 520, 250, 98, 98, null, 70); //xpos 520
+var wamGame =  new Thing("src/things.png", 490, 250, 98, 98, null, 70); //xpos 520
 wam.spriteSheet = new Image();
 wam.spriteSheet.src = "wam/wam.png";
 wamGame.standing = function(){

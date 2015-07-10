@@ -150,7 +150,7 @@ function draw(){
 	ctx.fillRect(0,0,WIDTH,HEIGHT);
 	drawPattern("src/background.png",200,0,100,100,0,50,WIDTH+offsetX,200,false);
 	drawPattern("src/background.png",100,0,50,50,0,250,WIDTH+offsetX,50,false);
-	drawPattern("src/background.png",0,100,200,100,196,128,114,63,true);
+	drawPattern("src/background.png",0,100,200,100,176,128,114,63,true);
 	ctx.fillStyle = "#000000";
 	ctx.fillRect(0,0,WIDTH,50);
 	ctx.fillRect(0,350,WIDTH,50);
@@ -597,7 +597,7 @@ Table1.prototype.update = function(){
 		player.forcedWalking = false;
 	}
 };
-var table1 = new Table1("src/things.png",253,250,198,98,null,70);
+var table1 = new Table1("src/things.png",233,250,198,98,null,70);
 table1.rightChair.occupied=true;
 table1.standing = function(){
 	this.drawData.frameTotNum = 1;
@@ -609,7 +609,7 @@ table1.action = function(){
 table1.messageData.time = [100,100];
 table1.messageData.string = ["There is a yellow flower on the table.", "What kind of flower is it?"];
 
-var refrigerator = new Thing("src/things.png",390,250,98,98,null,90);
+var refrigerator = new Thing("src/things.png",370,250,98,98,null,90);
 refrigerator.standing = function(){
 	this.drawData.frameTotNum = 1;
 	this.drawData.frame[1] = {x: 200, y: 0};
@@ -620,7 +620,7 @@ refrigerator.action = function(){
 refrigerator.messageData.time = [150];
 refrigerator.messageData.string = ["A note on the refrigerator : 'do not open someone else's refrigerator, that's rude.'"];
 
-var cat = new Thing("src/things.png",390,166,98,98,null,30);
+var cat = new Thing("src/things.png",370,166,98,98,null,30);
 cat.standing = function(){
 
 	this.drawData.frameTotNum = 2;
@@ -663,7 +663,7 @@ photoframe03.action = function(){
 	photoframe01.mainMessage();
 };
 
-var window01 = new Thing("src/things.png",250,250,198,198,null);
+var window01 = new Thing("src/things.png",230,250,198,198,null);
 window01.standing = function(){
 	this.drawData.frameTotNum = 2;
 	this.drawData.frame[1] = {x: 0, y: 200};
@@ -675,7 +675,7 @@ window01.update = function(){
 	this.y = this.abY - offsetY;
 };
 
-var girl1 = new Thing("src/things.png",308,250,98,98,null,70);
+var girl1 = new Thing("src/things.png",288,250,98,98,null,70);
 girl1.attention = "right";
 girl1.standing = function(){
 	this.drawData.frameTotNum = 2;
