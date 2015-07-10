@@ -220,19 +220,22 @@ var bubble={
     }
   },
   bubbleGlue: function(bubbleObj){
-    this.TargetPosition={xPos:null, yPos:null, distance:60};
-    for(var i=0;i<this.bubbleData.length;i++){
-      var offset=this.gapOffset(i);
-      for(var j=0; j<this.numOfColumn+offset; j++){
-        if(this.bubbleData[i][j].num===null){
-          if(distance(this.bubbleData[i][j], bubbleObj, "both")<this.TargetPosition.distance){
-            this.TargetPosition.distance =distance(this.bubbleData[i][j], bubbleObj, "both");
-            this.TargetPosition.xPos=j;
-            this.TargetPosition.yPos=i;
+    if(this.bubbles[bubbleObj.num].special !== "bomb"){
+      this.TargetPosition={xPos:null, yPos:null, distance:60};
+      for(var i=0;i<this.bubbleData.length;i++){
+        var offset=this.gapOffset(i);
+        for(var j=0; j<this.numOfColumn+offset; j++){
+          if(this.bubbleData[i][j].num===null){
+            if(distance(this.bubbleData[i][j], bubbleObj, "both")<this.TargetPosition.distance){
+              this.TargetPosition.distance =distance(this.bubbleData[i][j], bubbleObj, "both");
+              this.TargetPosition.xPos=j;
+              this.TargetPosition.yPos=i;
+            }
           }
         }
       }
     }
+
     this.bubbleData[this.TargetPosition.yPos][this.TargetPosition.xPos].num = bubbleObj.num;
     this.bubbleData[this.TargetPosition.yPos][this.TargetPosition.xPos].obstacleChecked = false;
     this.bubbleAction(this.TargetPosition.yPos,this.TargetPosition.xPos);
@@ -243,9 +246,10 @@ var bubble={
       for(var j=0; j<this.numOfColumn+offset; j++){
         if(this.bubbleData[i][j].num!==null){
           if(distance(this.bubbleData[i][j], bubbleObj, "both")<=20||(distance(this.bubbleData[i][j], bubbleObj, "both")<=30 && Math.abs(this.bubbleMove.xVelocity/this.bubbleMove.yVelocity-(this.bubbleMove.x-this.bubbleData[i][j].x)/(this.bubbleMove.y-this.bubbleData[i][j].y))<=0.7)){
-          console.log(Math.abs(this.bubbleMove.xVelocity/this.bubbleMove.yVelocity-(this.bubbleMove.x-this.bubbleData[i][j].x)/(this.bubbleMove.y-this.bubbleData[i][j].y)));
 //            dot(this.bubbleData[i][j].x,this.bubbleData[i][j].y,"blue");
 //            dot(bubbleObj.x,bubbleObj.y,"red");
+            this.TargetPosition.xPos=j;
+            this.TargetPosition.yPos=i;
             glueIt(this);
             return;
           }
@@ -270,11 +274,11 @@ var bubble={
     this.fallingCheck();
     this.bubbleReloader();
     this.turnCount++;
-    if(this.turnCount !== 0 && (this.turnCount+3)%12 === 0) {
+    if(this.turnCount !== 0 && (this.turnCount+3)%9 === 0) {
       this.shakeGene(1, 5, 30);
-    } else if(this.turnCount !== 0 && (this.turnCount+1)%12 === 0) {
+    } else if(this.turnCount !== 0 && (this.turnCount+1)%9 === 0) {
       this.shakeGene(1.5, 3, 50);
-    } else if(this.turnCount !== 0 && this.turnCount%12 === 0) {
+    } else if(this.turnCount !== 0 && this.turnCount%9 === 0) {
       this.lineAdder();
       this.shake.status = false;
     }
