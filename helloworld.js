@@ -13,11 +13,7 @@ var gravity = 0.25;
 var gameOn = false;
 var inputAllowed ="true";
 var offsetX = 0, offsetY = 0;
-var mouse = {
-	status : false,
-	x : null,
-	y : null
-};
+
 var canvas = document.createElement('canvas');
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
@@ -44,36 +40,66 @@ function oneHit(key){
 var keystate = {};
 var keystateOneHit = {};
 document.addEventListener("keydown", function(e){
-
 	(keystate[e.keyCode])?keystateOneHit[e.keyCode]:keystateOneHit[e.keyCode] = true;
-
 	if(inputAllowed) keystate[e.keyCode] = true;
 	if(instruction.isOn) instruction.isOn = false;
 });
 document.addEventListener("keyup", function(e){
 	delete keystate[e.keyCode];
 });
-var event = (navigator.platform.toString()[0]=="i") ? "touchstart" : "click";
-document.addEventListener(event,function(e){
+var mouse = {
+	status : false,
+	x : undefined,
+	y : undefined
+};
+function mouseClick(x,y){
 	if(instruction.isOn) instruction.isOn = false;
-    var x, y;
-    switch(e.type){
-      case "click":
-      x=e.pageX;
-      y=e.pageY;
-      break;
-      case "touchstart":
-      var touchobj = e.changedTouches[0]; // reference first touch point (ie: first finger)
-      x = parseInt(touchobj.pageX); // get x position of touch point relative to left edge of browser
-      y = parseInt(touchobj.pageY);
-      break;
-    }
 	mouse.x = WIDTH * (x-canvas.offsetLeft)/(canvas.offsetWidth);
 	mouse.y = HEIGHT * (y-canvas.offsetTop)/(canvas.offsetHeight);
 	if(inputAllowed&&mouse.x<WIDTH&&mouse.x>0&&mouse.y>0&&mouse.y<HEIGHT) {
 		mouse.status=true;
 	}
+}
+document.addEventListener("click",function(e){
+  mouseClick(e.pageX, e.pageY);
 });
+var touch = {
+	status:false,
+	startTime:undefined,
+	startX:undefined,
+	startY:undefined,
+	endTime:undefined,
+	endX:undefined,
+	endY:undefined
+};
+canvas.addEventListener("touchstart",function(e){
+  e.preventDefault();
+	touch.status = true;
+	var time = new Date();
+	touch.startTime = time.getTime();
+  var touchobj = e.changedTouches[0];
+  touch.startX = parseInt(touchobj.pageX);
+  touch.startY = parseInt(touchobj.pageY);
+  touch.endX = parseInt(touchobj.pageX);
+  touch.endY = parseInt(touchobj.pageY);
+  });
+canvas.addEventListener("touchmove",function(e){
+  var touchobj = e.changedTouches[0];
+  touch.endX = parseInt(touchobj.pageX);
+  touch.endY = parseInt(touchobj.pageY);
+});
+canvas.addEventListener("touchend",function(e){
+	var time = new Date();
+	touch.endTime = time.getTime();
+	if(touch.endTime-touch.startTime<500 && Math.abs(touch.endY-touch.startY)<10 && Math.abs(touch.endX-touch.startX<10)){
+ 	 mouseClick(touch.endX,touch.endY);
+	}
+	touch.status = false;
+	touch.startX = null;
+	touch.startY = null;
+
+});
+
 function distance(A, B, option){
 	switch(option){
 		case "x" :

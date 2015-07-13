@@ -4,6 +4,8 @@ var bubble={
   backgroundSheet: undefined,
   gameMode:undefined,
   click: false,
+  angleOriginal: undefined,
+  angleTouchOffset: undefined,
   turnCount: undefined,
   numOfColumn: undefined,
   bubbleData: undefined,
@@ -18,7 +20,7 @@ var bubble={
 		this.menuGene("main");
 	},
 	isRectClick: function(x,y,width,height){
-		if(this.click &&mouse.x>x && mouse.y>y && mouse.x<x+width && mouse.y<y+height){
+		if(this.click && mouse.x>x && mouse.y>y && mouse.x<x+width && mouse.y<y+height){
 			this.click = false;
 			return true;
 		}
@@ -78,7 +80,7 @@ var bubble={
         this.menu[2] = {status: false};//battleMode
         this.menu[3] = {status: false};//ranks
         this.menu[4] = {status: false};//exit
-        this.menu[5] = {status: true, x:373, y:325, width:50, height:20, string:"EXIT"}; //main menu
+        this.menu[5] = {status: true, x:380, y:325, width:50, height:25, string:"EXIT"}; //main menu
         break;
       case "exitBattle":
         this.menu.background = false;
@@ -88,7 +90,7 @@ var bubble={
         this.menu[2] = {status: false};//battleMode
         this.menu[3] = {status: false};//ranks
         this.menu[4] = {status: false};//exit
-        this.menu[5] = {status: true, x:567, y:325, width:50, height:20, string:"EXIT"}; //main menu
+        this.menu[5] = {status: true, x:567, y:325, width:50, height:25, string:"EXIT"}; //main menu
         break;
     }
 	},
@@ -103,12 +105,14 @@ var bubble={
   				switch(i){
   					case 1: //siglePlay
               this.menuGene("exitSingle");
+              this.click = false;
               this.battle.status = false;
               this.single.status = false;
     					this.singleGene();
     					break;
   					case 2: //battleMode
     					this.menuGene("exitBattle");
+              this.click = false;
               this.battle.status = false;
               this.single.status = false;
     					this.battleGene();
@@ -123,6 +127,7 @@ var bubble={
               this.single.status = false;
               this.menu.status = false;
     					this.exit();
+              this.
     					break;
   					case 5: //Game exit
     					if(this.gameMode=="singleMode"){
@@ -132,6 +137,8 @@ var bubble={
               this.battle.status = false;
               this.single.status = false;
               this.gameOver.status = false;
+              this.obstacleBubbleReset();
+              this.bubbleFallingReset();
     					this.menuGene("main");
   					break;
           }
@@ -460,6 +467,9 @@ var bubble={
     }
   },
   obstacleBubble: {},
+  obstacleBubbleReset: function(){
+    this.obstacleBubble = {};
+  },
   obstacleBubbleGene: function(xOrigin){
     for(var i=0; i<100; i++){
       if(this.obstacleBubble[i]===undefined){
@@ -489,6 +499,9 @@ var bubble={
     }
   },
   bubbleFalling: {count:0},
+  bubbleFallingReset: function(){
+    this.bubbleFalling = {count:0};
+  },
   bubbleFallingGene: function(yOrigin, xOrigin, numOrigin){
     for(var i=0; i<100; i++){
       if(this.bubbleFalling[i]===undefined){
@@ -680,6 +693,7 @@ var bubble={
       this.gameOver.result.size=30+this.gameOver.count*0.1;
     }
     if(this.gameOver.count ==70){
+      this.click=false;
       this.menuGene(this.gameMode);
     }
 
@@ -749,9 +763,6 @@ var bubble={
       1:{
         score: undefined,
         arrow: { angle: 0, x:180, y:299+4, sx:216, sy:482, width:16, height:80 },
-        buttonLeft:{ x:82, y:345, sx:236, sy:482, width:38, height:28 },
-        buttonRight:{ x:254, y:345, sx:278, sy:482, width:38, height:28 },
-        buttonShoot:{ x:204, y:340, sx:320, sy:482, width:26, height:38 },
         borderLeft: 77,
         curBubble:{ isShow:true, num:undefined, x:188, y:342+4 },
         nextBubble:{ num:undefined, x:153, y:365+4 }
@@ -759,9 +770,6 @@ var bubble={
       2:{
         score: undefined,
         arrow: { angle: 0, x:404, y:299+4, sx:216, sy:482, width:16, height:80 },
-        buttonLeft:{ x:306, y:345, sx:236, sy:482, width:38, height:28 },
-        buttonRight:{ x:478, y:345, sx:278, sy:482, width:38, height:28 },
-        buttonShoot:{ x:428, y:340, sx:320, sy:482, width:26, height:38 },
         borderLeft: 285,
         curBubble:{ isShow:true, num:undefined, x:412, y:342+4 },
         nextBubble:{ num:undefined, x:377, y:365+4 }
@@ -776,6 +784,8 @@ var bubble={
     this.turnCount = 0;
     this.shake.status = false;
     this.gameOver.status = false;
+    this.angleOriginal = 0;
+    this.angleTouchOffset = 0;
     this.battle.whoseTurn = 1;
     this.battle.whoHasControl = 1;
     this.battle.leftButtonToggle = false;
@@ -834,9 +844,6 @@ var bubble={
     ctx.fillStyle = "rgba(0,0,0,0.7)";
     ctx.fillRect(0,0,WIDTH,HEIGHT);
     ctx.drawImage(this.backgroundSheet, this.battle.background[this.battle.background.num].sx, this.battle.background[this.battle.background.num].sy, this.battle.background[this.battle.background.num].width, this.battle.background[this.battle.background.num].height, this.battle.background[this.battle.background.num].x, this.battle.background[this.battle.background.num].y, this.battle.background[this.battle.background.num].width*2, this.battle.background[this.battle.background.num].height*2);
-    (this.battle.whoseTurn == 1)?
-      ctx.drawImage(this.spriteSheet, 474, 96, 2, 370, 315, 15, 2, 370):
-      ctx.drawImage(this.spriteSheet, 478, 96, 2, 370, 283, 15, 2, 370);
     ctx.drawImage(this.spriteSheet, this.battle.gameFrame.sx, this.battle.gameFrame.sy, this.battle.gameFrame.width, this.battle.gameFrame.height, this.battle.gameFrame.x, this.battle.gameFrame.y, this.battle.gameFrame.width, this.battle.gameFrame.height);
     //gameBubbles
     var shakeOffset=0;
@@ -867,10 +874,9 @@ var bubble={
     ctx.restore();
     if(this.battle.player[2].curBubble.isShow) ctx.drawImage(this.spriteSheet, this.bubbles[this.battle.player[2].curBubble.num].sx, this.bubbles[this.battle.player[2].curBubble.num].sy, this.bubbles.width, this.bubbles.height, this.battle.player[2].curBubble.x-16, this.battle.player[2].curBubble.y-16, this.bubbles.width, this.bubbles.height);
     ctx.drawImage(this.spriteSheet, this.bubbles[this.battle.player[2].nextBubble.num].sx, this.bubbles[this.battle.player[2].nextBubble.num].sy, this.bubbles.width, this.bubbles.height, this.battle.player[2].nextBubble.x-16, this.battle.player[2].nextBubble.y-16, this.bubbles.width, this.bubbles.height);
-    //player[whoseTurn] buttons
-    ctx.drawImage(this.spriteSheet, this.battle.player[this.battle.whoseTurn].buttonLeft.sx, this.battle.player[this.battle.whoseTurn].buttonLeft.sy, this.battle.player[this.battle.whoseTurn].buttonLeft.width, this.battle.player[this.battle.whoseTurn].buttonLeft.height, this.battle.player[this.battle.whoseTurn].buttonLeft.x, this.battle.player[this.battle.whoseTurn].buttonLeft.y, this.battle.player[this.battle.whoseTurn].buttonLeft.width, this.battle.player[this.battle.whoseTurn].buttonLeft.height);
-    ctx.drawImage(this.spriteSheet, this.battle.player[this.battle.whoseTurn].buttonRight.sx, this.battle.player[this.battle.whoseTurn].buttonRight.sy, this.battle.player[this.battle.whoseTurn].buttonRight.width, this.battle.player[this.battle.whoseTurn].buttonRight.height, this.battle.player[this.battle.whoseTurn].buttonRight.x, this.battle.player[this.battle.whoseTurn].buttonRight.y, this.battle.player[this.battle.whoseTurn].buttonRight.width, this.battle.player[this.battle.whoseTurn].buttonRight.height);
-    ctx.drawImage(this.spriteSheet, this.battle.player[this.battle.whoseTurn].buttonShoot.sx, this.battle.player[this.battle.whoseTurn].buttonShoot.sy, this.battle.player[this.battle.whoseTurn].buttonShoot.width, this.battle.player[this.battle.whoseTurn].buttonShoot.height, this.battle.player[this.battle.whoseTurn].buttonShoot.x, this.battle.player[this.battle.whoseTurn].buttonShoot.y, this.battle.player[this.battle.whoseTurn].buttonShoot.width, this.battle.player[this.battle.whoseTurn].buttonShoot.height);
+
+    ctx.fillStyle = "rgba(0,0,0,0.4)";
+    ctx.fillRect((this.battle.whoseTurn == 1)?(316):(76), 15, 208, 370)
   },
   battleUpdate: function(){
     this.bubbleFallingDraw();
@@ -878,29 +884,37 @@ var bubble={
     this.obstacleBubbleDraw();
     this.obstacleBubbleUpdate();
     if(bubble.gameOver.status !== true){
-      if(this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonLeft.x,this.battle.player[this.battle.whoHasControl].buttonLeft.y,this.battle.player[this.battle.whoHasControl].buttonLeft.width,this.battle.player[this.battle.whoHasControl].buttonLeft.height)){
-        (this.battle.leftButtonToggle)?this.battle.leftButtonToggle=false:this.battle.leftButtonToggle=true;
-        this.battle.rightButtonToggle=false;
-      }
-      if(this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonRight.x,this.battle.player[this.battle.whoHasControl].buttonRight.y,this.battle.player[this.battle.whoHasControl].buttonRight.width,this.battle.player[this.battle.whoHasControl].buttonRight.height)){
-        (this.battle.rightButtonToggle)?this.battle.rightButtonToggle=false:this.battle.rightButtonToggle=true;
-        this.battle.leftButtonToggle=false;
-      }
-      if(this.battle.leftButtonToggle||keystate[KEY_LEFT]){
-        this.battle.player[this.battle.whoHasControl].arrow.angle-=1;
-        if(this.battle.player[this.battle.whoHasControl].arrow.angle < -75) this.battle.player[this.battle.whoHasControl].arrow.angle = -75;
-      }
-      if(this.battle.rightButtonToggle||keystate[KEY_RIGHT]){
-        this.battle.player[this.battle.whoHasControl].arrow.angle+=1;
-        if(this.battle.player[this.battle.whoHasControl].arrow.angle > 75) this.battle.player[this.battle.whoHasControl].arrow.angle = 75;
-      }
-      if(this.bubbleMove.status===false &&(oneHit(KEY_SPACE)|| this.isRectClick(this.battle.player[this.battle.whoHasControl].buttonShoot.x,this.battle.player[this.battle.whoHasControl].buttonShoot.y,this.battle.player[this.battle.whoHasControl].buttonShoot.width,this.battle.player[this.battle.whoHasControl].buttonShoot.height))){
-        this.battle.player[this.battle.whoHasControl].curBubble.isShow=false;
-        this.bubbleMoveGene();
+      this.control(this.battle.player[this.battle.whoHasControl]);
+    }
+  },
+  control: function(player){
+    if(touch.status){
+      this.angleTouchOffset=(touch.endX - touch.startX)/5;
+      player.arrow.angle = this.angleTouchOffset+this.angleOriginal;
+    } else {
+      this.angleOriginal = player.arrow.angle;
+    }
+    if(keystate[KEY_LEFT]){
+      player.arrow.angle-=1;
+    }
+    if(keystate[KEY_RIGHT]){
+      player.arrow.angle+=1;
+    }
+    if(this.bubbleMove.status===false &&(oneHit(KEY_SPACE) || this.click)){
+      this.click=false;
+      player.curBubble.isShow=false;
+      this.bubbleMoveGene();
+      if(this.gameMode=="battleMode"){
         (this.battle.whoHasControl==1)?this.battle.whoHasControl=2:this.battle.whoHasControl=1;
-        this.battle.rightButtonToggle=false;
-        this.battle.leftButtonToggle=false;
       }
+    }
+    if(player.arrow.angle > 75){
+      player.arrow.angle = 75;
+      this.angleOriginal = 75-this.angleTouchOffset;
+    }
+    if(player.arrow.angle < -75){
+      player.arrow.angle = -75;
+      this.angleOriginal = -75-this.angleTouchOffset;
     }
   },
   single: {
@@ -916,9 +930,6 @@ var bubble={
     player: {
       score: undefined,
       arrow: { angle: 0, x:196, y:299+4, sx:216, sy:482, width:16, height:80 },
-      buttonLeft:{ x:98, y:345, sx:236, sy:482, width:38, height:28 },
-      buttonRight:{ x:272, y:345, sx:278, sy:482, width:38, height:28 },
-      buttonShoot:{ x:220, y:340, sx:320, sy:482, width:26, height:38 },
       borderLeft: 77,
       curBubble:{ isShow:true, num:undefined, x:204, y:342+4 },
       nextBubble:{ num:undefined, x:169, y:365+4 }
@@ -1043,10 +1054,6 @@ var bubble={
     ctx.restore();
     if(this.single.player.curBubble.isShow) ctx.drawImage(this.spriteSheet, this.bubbles[this.single.player.curBubble.num].sx, this.bubbles[this.single.player.curBubble.num].sy, this.bubbles.width, this.bubbles.height, this.single.player.curBubble.x-16, this.single.player.curBubble.y-16, this.bubbles.width, this.bubbles.height);
     ctx.drawImage(this.spriteSheet, this.bubbles[this.single.player.nextBubble.num].sx, this.bubbles[this.single.player.nextBubble.num].sy, this.bubbles.width, this.bubbles.height, this.single.player.nextBubble.x-16, this.single.player.nextBubble.y-16, this.bubbles.width, this.bubbles.height);
-    //player[whoseTurn] buttons
-    ctx.drawImage(this.spriteSheet, this.single.player.buttonLeft.sx, this.single.player.buttonLeft.sy, this.single.player.buttonLeft.width, this.single.player.buttonLeft.height, this.single.player.buttonLeft.x, this.single.player.buttonLeft.y, this.single.player.buttonLeft.width, this.single.player.buttonLeft.height);
-    ctx.drawImage(this.spriteSheet, this.single.player.buttonRight.sx, this.single.player.buttonRight.sy, this.single.player.buttonRight.width, this.single.player.buttonRight.height, this.single.player.buttonRight.x, this.single.player.buttonRight.y, this.single.player.buttonRight.width, this.single.player.buttonRight.height);
-    ctx.drawImage(this.spriteSheet, this.single.player.buttonShoot.sx, this.single.player.buttonShoot.sy, this.single.player.buttonShoot.width, this.single.player.buttonShoot.height, this.single.player.buttonShoot.x, this.single.player.buttonShoot.y, this.single.player.buttonShoot.width, this.single.player.buttonShoot.height);
     //score
 		ctx.font="25px Arial";
     ctx.strokeStyle="rgb(0,0,0)";
@@ -1079,30 +1086,8 @@ var bubble={
     if(this.timer.timeLeft==0 && this.gameOver.status !== true){
       this.gameOverGene(this.single.player.score);
     }
-    if(this.gameOver.status !== true){
-      if(this.isRectClick(this.single.player.buttonLeft.x,this.single.player.buttonLeft.y,this.single.player.buttonLeft.width,this.single.player.buttonLeft.height)){
-        (this.single.leftButtonToggle)?this.single.leftButtonToggle=false:this.single.leftButtonToggle=true;
-        this.single.rightButtonToggle=false;
-      }
-      if(this.isRectClick(this.single.player.buttonRight.x,this.single.player.buttonRight.y,this.single.player.buttonRight.width,this.single.player.buttonRight.height)){
-        (this.single.rightButtonToggle)?this.single.rightButtonToggle=false:this.single.rightButtonToggle=true;
-        this.single.leftButtonToggle=false;
-      }
-      if(this.single.leftButtonToggle||keystate[KEY_LEFT]){
-        this.single.player.arrow.angle-=1;
-        if(this.single.player.arrow.angle < -75) this.single.player.arrow.angle = -75;
-      }
-      if(this.single.rightButtonToggle||keystate[KEY_RIGHT]){
-        this.single.player.arrow.angle+=1;
-        if(this.single.player.arrow.angle > 75) this.single.player.arrow.angle = 75;
-      }
-      if(this.bubbleMove.status===false &&(oneHit(KEY_SPACE)|| this.isRectClick(this.single.player.buttonShoot.x,this.single.player.buttonShoot.y,this.single.player.buttonShoot.width,this.single.player.buttonShoot.height))){
-        this.single.player.score+=10;
-        this.single.player.curBubble.isShow=false;
-        this.bubbleMoveGene();
-        this.single.rightButtonToggle=false;
-        this.single.leftButtonToggle=false;
-      }
+    if(bubble.gameOver.status !== true){
+      this.control(this.single.player);
     }
   },
 	countdown: {
@@ -1198,6 +1183,7 @@ bubbleGame.update = function(){
 			mouse.status = false;
 			bubble.click = true;
 		}
+    bubble.menuUpdate();
 		if(bubble.battle.status){
 			bubble.battleDraw();
 			bubble.battleUpdate();
@@ -1219,7 +1205,7 @@ bubbleGame.update = function(){
 		}
 		if(bubble.menu.status){
 			bubble.menuDraw();
-			bubble.menuUpdate();
+      bubble.menuUpdate();
 		}
 		if(bubble.rank.status){
 			bubble.rankDraw();
