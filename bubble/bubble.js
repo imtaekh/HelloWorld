@@ -52,7 +52,7 @@ var bubble={
     },
 		title: {
 			status:undefined,
-			x:10,
+			x:162,
 			y:20,
 			sx:0,
 			sy:0,
@@ -62,10 +62,7 @@ var bubble={
 	},
 	menuGene: function(options) {
     this.menu.status = true;
-    this.gameOver.status = false;
     this.click = false;
-    this.battle.status = false;
-    this.single.status = false;
     this.bubbleMove.status = false;
     this.menu.instruction.player.curBubble.num = this.bubbleGenerator();
     this.menu.instruction.player.nextBubble.num = this.bubbleGenerator();
@@ -75,6 +72,8 @@ var bubble={
         this.menu.background = true;
         this.menu.title.status = true;
         this.menu.instruction.status = true;
+        this.gameMode="demoMode";
+        this.menu.instruction.player.curBubble.isShow=true;
         this.menu.textAlign = "left";
         this.menu[1] = {status: true, x:390, y:165, width:180, height:25, string:"SINGLE PLAY"}; //siglePlay
         this.menu[2] = {status: true, x:390, y:255, width:180, height:25, string:"BATTLE MODE"}; //battleMode
@@ -138,6 +137,8 @@ var bubble={
           textAlignOffset=-this.menu[i].width/2;
         }
         if(this.isRectClick(this.menu[i].x+textAlignOffset,this.menu[i].y-this.menu[i].height,this.menu[i].width,this.menu[i].height)){
+        this.battle.status = false;
+        this.single.status = false;
   				switch(i){
   					case 1: //siglePlay
               this.menuGene("exitSingle");
@@ -158,11 +159,10 @@ var bubble={
     					if(this.gameMode=="singleMode"){
                 postInfo("bubble/saveScore.php",name,this.single.player.score);
               }
+              this.gameOver.status = false;
               this.obstacleBubbleReset();
               this.bubbleFallingReset();
     					this.menuGene("main");
-              this.gameMode="demoMode";
-              this.menu.instruction.player.curBubble.isShow=true;
   					break;
           }
 				}
