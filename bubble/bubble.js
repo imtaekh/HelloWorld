@@ -12,7 +12,7 @@ var bubble={
   TargetPosition: {xPos:undefined, yPos:undefined, distance:undefined},
 	powerOn: function(){
     gameOn = true;
-    this.gameMode = null;
+    this.gameMode = "demoMode";
     this.gameOver.status = false;
     this.numOfColumn = null;
     this.bubbleData = null;
@@ -27,12 +27,33 @@ var bubble={
 	},
 	menu:{
 		status:false,
+    instruction: undefined,
 		background: undefined,
     textAlign: undefined,
+    instruction:{
+			status:undefined,
+			x:20,
+			y:110,
+			sx:282,
+			sy:84,
+			width:210,
+			height:214,
+
+      gameFrame: { x:230, y:346, sx:10, sy:84, width:148, height:12 },
+      luncher: { x:230, y:278, sx:290, sy:482, width:148, height:68 },
+      player: {
+        score: undefined,
+        arrow: { angle: 0, x:296, y:265, sx:216, sy:482, width:16, height:80 },
+        borderLeft: 77,
+        curBubble:{ isShow:true, num:1, x:304, y:308 },
+        nextBubble:{ num:2, x:269, y:330 }
+      },
+      bubbleData: undefined,
+    },
 		title: {
 			status:undefined,
-			x:88,
-			y:30,
+			x:10,
+			y:20,
 			sx:0,
 			sy:0,
 			width:288,
@@ -41,20 +62,30 @@ var bubble={
 	},
 	menuGene: function(options) {
     this.menu.status = true;
+    this.gameOver.status = false;
+    this.click = false;
+    this.battle.status = false;
+    this.single.status = false;
+    this.bubbleMove.status = false;
+    this.menu.instruction.player.curBubble.num = this.bubbleGenerator();
+    this.menu.instruction.player.nextBubble.num = this.bubbleGenerator();
+    this.menu.instruction.player.arrow.angle = 0;
     switch(options){
       case "main":
         this.menu.background = true;
         this.menu.title.status = true;
+        this.menu.instruction.status = true;
         this.menu.textAlign = "left";
-        this.menu[1] = {status: true, x:120, y:165, width:180, height:25, string:"SINGLE PLAY"}; //siglePlay
-        this.menu[2] = {status: true, x:120, y:255, width:180, height:25, string:"BATTLE MODE"}; //battleMode
-        this.menu[3] = {status: true, x:120, y:210, width:180, height:25, string:"RANKS(SINGLE)"}; //ranks
-        this.menu[4] = {status: true, x:120, y:300, width:80, height:25, string:"EXIT"}; //exit
+        this.menu[1] = {status: true, x:390, y:165, width:180, height:25, string:"SINGLE PLAY"}; //siglePlay
+        this.menu[2] = {status: true, x:390, y:255, width:180, height:25, string:"BATTLE MODE"}; //battleMode
+        this.menu[3] = {status: true, x:390, y:210, width:180, height:25, string:"RANKS(SINGLE)"}; //ranks
+        this.menu[4] = {status: true, x:390, y:300, width:80, height:25, string:"EXIT"}; //exit
         this.menu[5] = {status: false}; //main menu
         break;
       case "battleMode":
         this.menu.background = false;
         this.menu.title.status = false;
+        this.menu.instruction.status = false;
         this.menu.textAlign = "center";
         this.menu[1] = {status: false}; //siglePlay
         this.menu[2] = {status: true, x:300, y:220, width:180, height:20, string:"PLAY AGAIN"}; //battleMode
@@ -65,6 +96,7 @@ var bubble={
       case "singleMode":
         this.menu.background = false;
         this.menu.title.status = false;
+        this.menu.instruction.status = false;
         this.menu.textAlign = "center";
         this.menu[1] = {status: true, x:300, y:220, width:180, height:20, string:"PLAY AGAIN"}; //siglePlay
         this.menu[2] = {status: false};//battleMode
@@ -75,7 +107,9 @@ var bubble={
       case "exitSingle":
         this.menu.background = false;
         this.menu.title.status = false;
+        this.menu.instruction.status = false;
         this.menu.textAlign = "center";
+        this.gameMode = "demoMode";
         this.menu[1] = {status: false}; //siglePlay
         this.menu[2] = {status: false};//battleMode
         this.menu[3] = {status: false};//ranks
@@ -85,7 +119,9 @@ var bubble={
       case "exitBattle":
         this.menu.background = false;
         this.menu.title.status = false;
+        this.menu.instruction.status = false;
         this.menu.textAlign = "center";
+        this.gameMode = "demoMode";
         this.menu[1] = {status: false}; //siglePlay
         this.menu[2] = {status: false};//battleMode
         this.menu[3] = {status: false};//ranks
@@ -105,27 +141,16 @@ var bubble={
   				switch(i){
   					case 1: //siglePlay
               this.menuGene("exitSingle");
-              this.click = false;
-              this.battle.status = false;
-              this.single.status = false;
     					this.singleGene();
     					break;
   					case 2: //battleMode
     					this.menuGene("exitBattle");
-              this.click = false;
-              this.battle.status = false;
-              this.single.status = false;
     					this.battleGene();
     					break;
   					case 3: //ranks
-              this.battle.status = false;
-              this.single.status = false;
               this.rankGene();
     					break;
   					case 4: //Game exit
-              this.battle.status = false;
-              this.single.status = false;
-              this.menu.status = false;
     					this.exit();
               this.
     					break;
@@ -133,18 +158,19 @@ var bubble={
     					if(this.gameMode=="singleMode"){
                 postInfo("bubble/saveScore.php",name,this.single.player.score);
               }
-              this.menu.status = false;
-              this.battle.status = false;
-              this.single.status = false;
-              this.gameOver.status = false;
               this.obstacleBubbleReset();
               this.bubbleFallingReset();
     					this.menuGene("main");
+              this.gameMode="demoMode";
+              this.menu.instruction.player.curBubble.isShow=true;
   					break;
           }
 				}
 			}
 		}
+    if(this.menu.instruction.status == true){
+      this.control(this.menu.instruction.player);
+    }
 	},
 	menuDraw: function(){
 		ctx.save();
@@ -154,6 +180,19 @@ var bubble={
 		}
 		if(this.menu.title.status){
 			ctx.drawImage(this.spriteSheet, this.menu.title.sx, this.menu.title.sy, this.menu.title.width, this.menu.title.height, this.menu.title.x, this.menu.title.y, this.menu.title.width, this.menu.title.height);
+		}
+		if(this.menu.instruction.status){
+			ctx.drawImage(this.spriteSheet, this.menu.instruction.sx, this.menu.instruction.sy, this.menu.instruction.width, this.menu.instruction.height, this.menu.instruction.x, this.menu.instruction.y, this.menu.instruction.width, this.menu.instruction.height);
+      ctx.drawImage(this.spriteSheet, this.menu.instruction.gameFrame.sx, this.menu.instruction.gameFrame.sy, this.menu.instruction.gameFrame.width, this.menu.instruction.gameFrame.height, this.menu.instruction.gameFrame.x, this.menu.instruction.gameFrame.y, this.menu.instruction.gameFrame.width, this.menu.instruction.gameFrame.height);
+      ctx.drawImage(this.spriteSheet, this.menu.instruction.luncher.sx, this.menu.instruction.luncher.sy, this.menu.instruction.luncher.width, this.menu.instruction.luncher.height, this.menu.instruction.luncher.x, this.menu.instruction.luncher.y, this.menu.instruction.luncher.width, this.menu.instruction.luncher.height);
+      ctx.translate(this.menu.instruction.player.arrow.x+8,this.menu.instruction.player.arrow.y+44);
+      ctx.rotate(this.menu.instruction.player.arrow.angle*Math.PI/180);
+      ctx.drawImage(this.spriteSheet, this.menu.instruction.player.arrow.sx, this.menu.instruction.player.arrow.sy, this.menu.instruction.player.arrow.width, this.menu.instruction.player.arrow.height, -8, -44, this.menu.instruction.player.arrow.width, this.menu.instruction.player.arrow.height);
+      ctx.restore();
+      if(this.menu.instruction.player.curBubble.isShow) {
+        ctx.drawImage(this.spriteSheet, this.bubbles[this.menu.instruction.player.curBubble.num].sx, this.bubbles[this.menu.instruction.player.curBubble.num].sy, this.bubbles.width, this.bubbles.height, this.menu.instruction.player.curBubble.x-16, this.menu.instruction.player.curBubble.y-16, this.bubbles.width, this.bubbles.height);
+      }
+      ctx.drawImage(this.spriteSheet, this.bubbles[this.menu.instruction.player.nextBubble.num].sx, this.bubbles[this.menu.instruction.player.nextBubble.num].sy, this.bubbles.width, this.bubbles.height, this.menu.instruction.player.nextBubble.x-16, this.menu.instruction.player.nextBubble.y-16, this.bubbles.width, this.bubbles.height);
 		}
 		ctx.fillStyle="rgb(255,255,255)";
 		ctx.strokeStyle="rgb(0,0,0)";
@@ -206,7 +245,7 @@ var bubble={
       if(this.gameMode=="singleMode"){
         type=1;
         return 16;
-      } else if(this.gameMode=="battleMode"){
+      } else {
         type=2;
       }
     }
@@ -224,7 +263,13 @@ var bubble={
         this.single.player.nextBubble.num=this.bubbleGenerator();
         this.single.player.curBubble.isShow=true;
         break;
+      case "demoMode":
+        this.menu.instruction.player.curBubble.num=this.menu.instruction.player.nextBubble.num;
+        this.menu.instruction.player.nextBubble.num=this.bubbleGenerator();
+        this.menu.instruction.player.curBubble.isShow=true;
+        break;
     }
+
   },
   bubbleGlue: function(bubbleObj){
     if(this.bubbles[bubbleObj.num].special !== "bomb"){
@@ -309,6 +354,7 @@ var bubble={
     this.bubbleFalling.count=0;
     this.gameOverCheck();
     oneHit(KEY_SPACE);
+    this.click = false;
   },
   bubbleAction:function(yOrigin,xOrigin){
     var bubbleColor= Math.floor(this.bubbleData[yOrigin][xOrigin].num/3)*3;
@@ -541,38 +587,32 @@ var bubble={
     borderLeft: undefined,
     borderRight: undefined
   },
-  bubbleMoveGene: function(){
+  bubbleMoveGene: function(player){
     this.bubbleMove.status=true;
-    switch(this.gameMode){
-      case "battleMode":
-      this.bubbleMove.x = this.battle.player[this.battle.whoseTurn].curBubble.x;
-      this.bubbleMove.y = this.battle.player[this.battle.whoseTurn].curBubble.y;
-      this.bubbleMove.num = this.battle.player[this.battle.whoseTurn].curBubble.num;
-      this.bubbleMove.borderLeft = this.battle.player[this.battle.whoseTurn].borderLeft;
-      this.bubbleMove.borderRight = this.bubbleMove.borderLeft+238;
-      this.bubbleMove.yVelocity=Number(Math.sin(bubble.battle.player[this.battle.whoseTurn].arrow.angle*Math.PI/180-1/2*Math.PI)).toFixed(2)*this.bubbleMove.velocity;
-      this.bubbleMove.xVelocity=Number(Math.cos(bubble.battle.player[this.battle.whoseTurn].arrow.angle*Math.PI/180-1/2*Math.PI)).toFixed(2)*this.bubbleMove.velocity;
-      break;
-      case "singleMode":
-      this.bubbleMove.x = this.single.player.curBubble.x;
-      this.bubbleMove.y = this.single.player.curBubble.y;
-      this.bubbleMove.num = this.single.player.curBubble.num;
-      this.bubbleMove.borderLeft = this.single.player.borderLeft;
-      this.bubbleMove.borderRight = this.bubbleMove.borderLeft+238;
-      this.bubbleMove.yVelocity=Number(Math.sin(bubble.single.player.arrow.angle*Math.PI/180-1/2*Math.PI)).toFixed(2)*this.bubbleMove.velocity;
-      this.bubbleMove.xVelocity=Number(Math.cos(bubble.single.player.arrow.angle*Math.PI/180-1/2*Math.PI)).toFixed(2)*this.bubbleMove.velocity;
-      break;
-    }
+    this.bubbleMove.x = player.curBubble.x;
+    this.bubbleMove.y = player.curBubble.y;
+    this.bubbleMove.num = player.curBubble.num;
+    this.bubbleMove.borderLeft = player.borderLeft;
+    this.bubbleMove.borderRight = this.bubbleMove.borderLeft+238;
+    this.bubbleMove.yVelocity=Number(Math.sin(player.arrow.angle*Math.PI/180-1/2*Math.PI)).toFixed(2)*this.bubbleMove.velocity;
+    this.bubbleMove.xVelocity=Number(Math.cos(player.arrow.angle*Math.PI/180-1/2*Math.PI)).toFixed(2)*this.bubbleMove.velocity;
   },
   bubbleMoveUpdate: function(){
-    if(this.bubbleMove.x-16<this.bubbleMove.borderLeft){
-      this.bubbleMove.x=this.bubbleMove.borderLeft+16;
-      this.bubbleMove.xVelocity*=(-1);
-    } else if(this.bubbleMove.x+16>this.bubbleMove.borderRight){
-      this.bubbleMove.x=this.bubbleMove.borderRight-16;
-      this.bubbleMove.xVelocity*=(-1);
+    if(this.menu.instruction.status){
+      if(this.bubbleMove.y<0||this.bubbleMove.x<0||this.bubbleMove.x>WIDTH){
+        this.bubbleMove.status=false;
+        this.bubbleReloader();
+      }
+    }else {
+      if(this.bubbleMove.x-16<this.bubbleMove.borderLeft){
+        this.bubbleMove.x=this.bubbleMove.borderLeft+16;
+        this.bubbleMove.xVelocity*=(-1);
+      } else if(this.bubbleMove.x+16>this.bubbleMove.borderRight){
+        this.bubbleMove.x=this.bubbleMove.borderRight-16;
+        this.bubbleMove.xVelocity*=(-1);
+      }
+      this.bubbleGlueCheck(this.bubbleMove);
     }
-    this.bubbleGlueCheck(this.bubbleMove);
     this.bubbleMove.x+=this.bubbleMove.xVelocity;
     this.bubbleMove.y+=this.bubbleMove.yVelocity;
   },
@@ -754,7 +794,10 @@ var bubble={
       maxNum: 1,
       0:{ x:76, y:15, sx:0, sy:0, width:224, height:186 }
     },
-    gameFrame: { x:64, y:3, sx:0, sy:84, width:472, height:394 },
+    gameFrameLeft: { x:64, y:3, sx:0, sy:84, width:236, height:394 },
+    gameFrameRight: { x:300, y:3, sx:44, sy:84, width:236, height:394 },
+    luncherLeft: { x:76, y:317, sx:252, sy:482, width:224, height:68 },
+    luncherRight: { x:300, y:317, sx:252, sy:482, width:224, height:68 },
     whoseTurn: undefined,
     whoHasControl: undefined,
     leftButtonToggle: undefined,
@@ -762,16 +805,16 @@ var bubble={
     player: {
       1:{
         score: undefined,
-        arrow: { angle: 0, x:180, y:299+4, sx:216, sy:482, width:16, height:80 },
+        arrow: { angle: 0, x:180, y:304, sx:216, sy:482, width:16, height:80 },
         borderLeft: 77,
-        curBubble:{ isShow:true, num:undefined, x:188, y:342+4 },
+        curBubble:{ isShow:true, num:undefined, x:188, y:347 },
         nextBubble:{ num:undefined, x:153, y:365+4 }
       },
       2:{
         score: undefined,
         arrow: { angle: 0, x:404, y:299+4, sx:216, sy:482, width:16, height:80 },
         borderLeft: 285,
-        curBubble:{ isShow:true, num:undefined, x:412, y:342+4 },
+        curBubble:{ isShow:true, num:undefined, x:412, y:347 },
         nextBubble:{ num:undefined, x:377, y:365+4 }
       },
       bubbleData:undefined,
@@ -844,7 +887,10 @@ var bubble={
     ctx.fillStyle = "rgba(0,0,0,0.7)";
     ctx.fillRect(0,0,WIDTH,HEIGHT);
     ctx.drawImage(this.backgroundSheet, this.battle.background[this.battle.background.num].sx, this.battle.background[this.battle.background.num].sy, this.battle.background[this.battle.background.num].width, this.battle.background[this.battle.background.num].height, this.battle.background[this.battle.background.num].x, this.battle.background[this.battle.background.num].y, this.battle.background[this.battle.background.num].width*2, this.battle.background[this.battle.background.num].height*2);
-    ctx.drawImage(this.spriteSheet, this.battle.gameFrame.sx, this.battle.gameFrame.sy, this.battle.gameFrame.width, this.battle.gameFrame.height, this.battle.gameFrame.x, this.battle.gameFrame.y, this.battle.gameFrame.width, this.battle.gameFrame.height);
+    ctx.drawImage(this.spriteSheet, this.battle.gameFrameLeft.sx, this.battle.gameFrameLeft.sy, this.battle.gameFrameLeft.width, this.battle.gameFrameLeft.height, this.battle.gameFrameLeft.x, this.battle.gameFrameLeft.y, this.battle.gameFrameLeft.width, this.battle.gameFrameLeft.height);
+    ctx.drawImage(this.spriteSheet, this.battle.gameFrameRight.sx, this.battle.gameFrameRight.sy, this.battle.gameFrameRight.width, this.battle.gameFrameRight.height, this.battle.gameFrameRight.x, this.battle.gameFrameRight.y, this.battle.gameFrameRight.width, this.battle.gameFrameRight.height);
+    ctx.drawImage(this.spriteSheet, this.battle.luncherLeft.sx, this.battle.luncherLeft.sy, this.battle.luncherLeft.width, this.battle.luncherLeft.height, this.battle.luncherLeft.x, this.battle.luncherLeft.y, this.battle.luncherLeft.width, this.battle.luncherLeft.height);
+    ctx.drawImage(this.spriteSheet, this.battle.luncherRight.sx, this.battle.luncherRight.sy, this.battle.luncherRight.width, this.battle.luncherRight.height, this.battle.luncherRight.x, this.battle.luncherRight.y, this.battle.luncherRight.width, this.battle.luncherRight.height);
     //gameBubbles
     var shakeOffset=0;
     if(this.shake.status && this.gameOver.status !== true){
@@ -903,7 +949,7 @@ var bubble={
     if(this.bubbleMove.status===false &&(oneHit(KEY_SPACE) || this.click)){
       this.click=false;
       player.curBubble.isShow=false;
-      this.bubbleMoveGene();
+      this.bubbleMoveGene(player);
       if(this.gameMode=="battleMode"){
         (this.battle.whoHasControl==1)?this.battle.whoHasControl=2:this.battle.whoHasControl=1;
       }
@@ -924,14 +970,13 @@ var bubble={
       maxNum: 1,
       0:{ x:76, y:15, sx:35, sy:0, width:128, height:186 }
     },
-    gameFrame: { x:64, y:3, sx:482, sy:84, width:280, height:394 },
-    leftButtonToggle: undefined,
-    rightButtonToggle: undefined,
+    gameFrame: { x:64, y:3, sx:0, sy:84, width:280, height:394 },
+    luncher: { x:76, y:317, sx:236, sy:482, width:256, height:68 },
     player: {
       score: undefined,
-      arrow: { angle: 0, x:196, y:299+4, sx:216, sy:482, width:16, height:80 },
+      arrow: { angle: 0, x:196, y:304, sx:216, sy:482, width:16, height:80 },
       borderLeft: 77,
-      curBubble:{ isShow:true, num:undefined, x:204, y:342+4 },
+      curBubble:{ isShow:true, num:undefined, x:204, y:347 },
       nextBubble:{ num:undefined, x:169, y:365+4 }
     },
     bubbleData: undefined,
@@ -1033,6 +1078,7 @@ var bubble={
     ctx.fillRect(0,0,WIDTH,HEIGHT);
     ctx.drawImage(this.backgroundSheet, this.single.background[this.single.background.num].sx, this.single.background[this.single.background.num].sy, this.single.background[this.single.background.num].width, this.single.background[this.single.background.num].height, this.single.background[this.single.background.num].x, this.single.background[this.single.background.num].y, this.single.background[this.single.background.num].width*2, this.single.background[this.single.background.num].height*2);
     ctx.drawImage(this.spriteSheet, this.single.gameFrame.sx, this.single.gameFrame.sy, this.single.gameFrame.width, this.single.gameFrame.height, this.single.gameFrame.x, this.single.gameFrame.y, this.single.gameFrame.width, this.single.gameFrame.height);
+    ctx.drawImage(this.spriteSheet, this.single.luncher.sx, this.single.luncher.sy, this.single.luncher.width, this.single.luncher.height, this.single.luncher.x, this.single.luncher.y, this.single.luncher.width, this.single.luncher.height);
     //gameBubbles
     var shakeOffset=0;
     if(this.shake.status && this.gameOver.status !== true){
@@ -1183,7 +1229,9 @@ bubbleGame.update = function(){
 			mouse.status = false;
 			bubble.click = true;
 		}
-    bubble.menuUpdate();
+    if(bubble.menu.status){
+      bubble.menuUpdate();
+    }
 		if(bubble.battle.status){
 			bubble.battleDraw();
 			bubble.battleUpdate();
@@ -1195,10 +1243,6 @@ bubbleGame.update = function(){
 		if(bubble.shake.status){
 			bubble.shakeUpdate();
 		}
-		if(bubble.bubbleMove.status){
-			bubble.bubbleMoveDraw();
-			bubble.bubbleMoveUpdate();
-		}
 		if(bubble.gameOver.status){
 			bubble.gameOverDraw();
 			bubble.gameOverUpdate();
@@ -1206,6 +1250,10 @@ bubbleGame.update = function(){
 		if(bubble.menu.status){
 			bubble.menuDraw();
       bubble.menuUpdate();
+		}
+		if(bubble.bubbleMove.status){
+			bubble.bubbleMoveDraw();
+			bubble.bubbleMoveUpdate();
 		}
 		if(bubble.rank.status){
 			bubble.rankDraw();
