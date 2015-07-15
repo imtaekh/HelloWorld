@@ -46,7 +46,8 @@ var bubble={
         arrow: { angle: 0, x:296, y:265, sx:216, sy:482, width:16, height:80 },
         borderLeft: 77,
         curBubble:{ isShow:true, num:1, x:304, y:308 },
-        nextBubble:{ num:2, x:269, y:330 }
+        nextBubble:{ num:2, x:269, y:330 },
+        thirdBubble:{ num:2, x:230, y:330 }
       },
       bubbleData: undefined,
     },
@@ -66,6 +67,7 @@ var bubble={
     this.bubbleMove.status = false;
     this.menu.instruction.player.curBubble.num = this.bubbleGenerator();
     this.menu.instruction.player.nextBubble.num = this.bubbleGenerator();
+    this.menu.instruction.player.thirdBubble.num = this.bubbleGenerator();
     this.menu.instruction.player.arrow.angle = 0;
     switch(options){
       case "main":
@@ -193,6 +195,7 @@ var bubble={
         ctx.drawImage(this.spriteSheet, this.bubbles[this.menu.instruction.player.curBubble.num].sx, this.bubbles[this.menu.instruction.player.curBubble.num].sy, this.bubbles.width, this.bubbles.height, this.menu.instruction.player.curBubble.x-16, this.menu.instruction.player.curBubble.y-16, this.bubbles.width, this.bubbles.height);
       }
       ctx.drawImage(this.spriteSheet, this.bubbles[this.menu.instruction.player.nextBubble.num].sx, this.bubbles[this.menu.instruction.player.nextBubble.num].sy, this.bubbles.width, this.bubbles.height, this.menu.instruction.player.nextBubble.x-16, this.menu.instruction.player.nextBubble.y-16, this.bubbles.width, this.bubbles.height);
+      ctx.drawImage(this.spriteSheet, this.bubbles[this.menu.instruction.player.thirdBubble.num].sx+16, this.bubbles[this.menu.instruction.player.thirdBubble.num].sy, this.bubbles.width-16, this.bubbles.height, this.menu.instruction.player.thirdBubble.x-16+16, this.menu.instruction.player.thirdBubble.y-16, this.bubbles.width-16, this.bubbles.height);
 		}
 		ctx.fillStyle="rgb(255,255,255)";
 		ctx.strokeStyle="rgb(0,0,0)";
@@ -255,17 +258,20 @@ var bubble={
     switch(this.gameMode){
       case "battleMode":
         this.battle.player[this.battle.whoseTurn].curBubble.num=this.battle.player[this.battle.whoseTurn].nextBubble.num;
-        this.battle.player[this.battle.whoseTurn].nextBubble.num=this.bubbleGenerator();
+        this.battle.player[this.battle.whoseTurn].nextBubble.num=this.battle.player[this.battle.whoseTurn].thirdBubble.num;
+        this.battle.player[this.battle.whoseTurn].thirdBubble.num=this.bubbleGenerator();
         this.battle.player[this.battle.whoseTurn].curBubble.isShow=true;
         break;
       case "singleMode":
         this.single.player.curBubble.num=this.single.player.nextBubble.num;
-        this.single.player.nextBubble.num=this.bubbleGenerator();
+        this.single.player.nextBubble.num=this.single.player.thirdBubble.num;
+        this.single.player.thirdBubble.num=this.bubbleGenerator();
         this.single.player.curBubble.isShow=true;
         break;
       case "demoMode":
         this.menu.instruction.player.curBubble.num=this.menu.instruction.player.nextBubble.num;
-        this.menu.instruction.player.nextBubble.num=this.bubbleGenerator();
+        this.menu.instruction.player.nextBubble.num=this.menu.instruction.player.thirdBubble.num;
+        this.menu.instruction.player.thirdBubble.num=this.bubbleGenerator();
         this.menu.instruction.player.curBubble.isShow=true;
         break;
     }
@@ -808,14 +814,16 @@ var bubble={
         arrow: { angle: 0, x:180, y:304, sx:216, sy:482, width:16, height:80 },
         borderLeft: 77,
         curBubble:{ isShow:true, num:undefined, x:188, y:347 },
-        nextBubble:{ num:undefined, x:153, y:365+4 }
+        nextBubble:{ num:undefined, x:153, y:369 },
+        thirdBubble:{ num:2, x:114, y:369 }
       },
       2:{
         score: undefined,
         arrow: { angle: 0, x:404, y:299+4, sx:216, sy:482, width:16, height:80 },
         borderLeft: 285,
         curBubble:{ isShow:true, num:undefined, x:412, y:347 },
-        nextBubble:{ num:undefined, x:377, y:365+4 }
+        nextBubble:{ num:undefined, x:377, y:369 },
+        thirdBubble:{ num:2, x:338, y:369 }
       },
       bubbleData:undefined,
     }
@@ -836,10 +844,12 @@ var bubble={
     this.battle.background.num=Math.floor(Math.random()*this.battle.background.maxNum);
     this.battle.player[1].curBubble.num=this.bubbleGenerator();
     this.battle.player[1].nextBubble.num=this.bubbleGenerator();
+    this.battle.player[1].thirdBubble.num=this.bubbleGenerator();
     this.battle.player[1].score=0;
     this.battle.player[1].arrow.angle=0
     this.battle.player[2].curBubble.num=this.bubbleGenerator();
     this.battle.player[2].nextBubble.num=this.bubbleGenerator();
+    this.battle.player[2].thirdBubble.num=this.bubbleGenerator();
     this.battle.player[2].score=0;
     this.battle.player[2].arrow.angle=0;
     this.battle.bubbleData=new Array(12);
@@ -912,6 +922,7 @@ var bubble={
     ctx.restore();
     if(this.battle.player[1].curBubble.isShow) ctx.drawImage(this.spriteSheet, this.bubbles[this.battle.player[1].curBubble.num].sx, this.bubbles[this.battle.player[1].curBubble.num].sy, this.bubbles.width, this.bubbles.height, this.battle.player[1].curBubble.x-16, this.battle.player[1].curBubble.y-16, this.bubbles.width, this.bubbles.height);
     ctx.drawImage(this.spriteSheet, this.bubbles[this.battle.player[1].nextBubble.num].sx, this.bubbles[this.battle.player[1].nextBubble.num].sy, this.bubbles.width, this.bubbles.height, this.battle.player[1].nextBubble.x-16, this.battle.player[1].nextBubble.y-16, this.bubbles.width, this.bubbles.height);
+    ctx.drawImage(this.spriteSheet, this.bubbles[this.battle.player[1].thirdBubble.num].sx, this.bubbles[this.battle.player[1].thirdBubble.num].sy, this.bubbles.width, this.bubbles.height, this.battle.player[1].thirdBubble.x-16, this.battle.player[1].thirdBubble.y-16, this.bubbles.width, this.bubbles.height);
     //player[2] arrow & bubble
     ctx.save();
     ctx.translate(this.battle.player[2].arrow.x+8,this.battle.player[2].arrow.y+44);
@@ -920,6 +931,7 @@ var bubble={
     ctx.restore();
     if(this.battle.player[2].curBubble.isShow) ctx.drawImage(this.spriteSheet, this.bubbles[this.battle.player[2].curBubble.num].sx, this.bubbles[this.battle.player[2].curBubble.num].sy, this.bubbles.width, this.bubbles.height, this.battle.player[2].curBubble.x-16, this.battle.player[2].curBubble.y-16, this.bubbles.width, this.bubbles.height);
     ctx.drawImage(this.spriteSheet, this.bubbles[this.battle.player[2].nextBubble.num].sx, this.bubbles[this.battle.player[2].nextBubble.num].sy, this.bubbles.width, this.bubbles.height, this.battle.player[2].nextBubble.x-16, this.battle.player[2].nextBubble.y-16, this.bubbles.width, this.bubbles.height);
+    ctx.drawImage(this.spriteSheet, this.bubbles[this.battle.player[2].thirdBubble.num].sx, this.bubbles[this.battle.player[2].thirdBubble.num].sy, this.bubbles.width, this.bubbles.height, this.battle.player[2].thirdBubble.x-16, this.battle.player[2].thirdBubble.y-16, this.bubbles.width, this.bubbles.height);
 
     ctx.fillStyle = "rgba(0,0,0,0.4)";
     ctx.fillRect((this.battle.whoseTurn == 1)?(316):(76), 15, 208, 370)
@@ -977,7 +989,8 @@ var bubble={
       arrow: { angle: 0, x:196, y:304, sx:216, sy:482, width:16, height:80 },
       borderLeft: 77,
       curBubble:{ isShow:true, num:undefined, x:204, y:347 },
-      nextBubble:{ num:undefined, x:169, y:365+4 }
+      nextBubble:{ num:undefined, x:169, y:369 },
+      thirdBubble:{ num:2, x:130, y:369 }
     },
     bubbleData: undefined,
   },
@@ -1028,6 +1041,7 @@ var bubble={
     this.single.background.num=Math.floor(Math.random()*this.single.background.maxNum);
     this.single.player.curBubble.num=this.bubbleGenerator();
     this.single.player.nextBubble.num=this.bubbleGenerator();
+    this.single.player.thirdBubble.num=this.bubbleGenerator();
     this.single.player.arrow.angle=0;
     this.single.player.score=0;
     this.single.bubbleData=new Array(12);
@@ -1100,6 +1114,7 @@ var bubble={
     ctx.restore();
     if(this.single.player.curBubble.isShow) ctx.drawImage(this.spriteSheet, this.bubbles[this.single.player.curBubble.num].sx, this.bubbles[this.single.player.curBubble.num].sy, this.bubbles.width, this.bubbles.height, this.single.player.curBubble.x-16, this.single.player.curBubble.y-16, this.bubbles.width, this.bubbles.height);
     ctx.drawImage(this.spriteSheet, this.bubbles[this.single.player.nextBubble.num].sx, this.bubbles[this.single.player.nextBubble.num].sy, this.bubbles.width, this.bubbles.height, this.single.player.nextBubble.x-16, this.single.player.nextBubble.y-16, this.bubbles.width, this.bubbles.height);
+    ctx.drawImage(this.spriteSheet, this.bubbles[this.single.player.thirdBubble.num].sx, this.bubbles[this.single.player.thirdBubble.num].sy, this.bubbles.width, this.bubbles.height, this.single.player.thirdBubble.x-16, this.single.player.thirdBubble.y-16, this.bubbles.width, this.bubbles.height);
     //score
 		ctx.font="25px Arial";
     ctx.strokeStyle="rgb(0,0,0)";
