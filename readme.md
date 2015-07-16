@@ -3,7 +3,7 @@
 <br>
 ##Welcome to HelloWorld!
 
-![HelloWorld Screenshot1](src/screenshot1.png)<br>
+![HelloWorld Screenshot1](src_readme/helloworld_screenshot1.png)<br>
 
 HelloWorld! is my game portfolio interface. Click to move your character and see my games
 <br>
@@ -14,8 +14,8 @@ Since it's using PHP and MySQL, please visit [http://ianh.co.nf](http://ianh.co.
 
 ##Game 1 : Wrack-a-mole
 
-![Wrack-a-mole Screenshot1](wam/screenshot1.png)<br>
-![Wrack-a-mole Screenshot2](wam/screenshot2.png)<br>
+![Wrack-a-mole Screenshot1](src_readme/wam_screenshot1.png)<br>
+![Wrack-a-mole Screenshot2](src_readme/wam_screenshot2.png)<br>
 
 ###Features
 - 60 seconds for hitting moles.
@@ -28,8 +28,8 @@ Since it's using PHP and MySQL, please visit [http://ianh.co.nf](http://ianh.co.
 
 ##Game 2 : Bubble
 
-![Bubble Screenshot1](bubble/screenshot1.png)<br>
-![Bubble Screenshot2](bubble/screenshot2.png)<br>
+![Bubble Screenshot1](src_readme/bubble_screenshot1.png)<br>
+![Bubble Screenshot2](src_readme/bubble_screenshot2.png)<br>
 
 ###Single Play features
 - you have 60 seconds.
@@ -39,7 +39,7 @@ Since it's using PHP and MySQL, please visit [http://ianh.co.nf](http://ianh.co.
 - Saves high scores in the database to see my rank and others score.
 - game over when bubbles goes over the border.
 
-![Bubble Screenshot3](bubble/screenshot3.png)<br>
+![Bubble Screenshot3](src_readme/bubble_screenshot3.png)<br>
 
 ###Bettle Mode features
 - game over when bubble hit the ground.
