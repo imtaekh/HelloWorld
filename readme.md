@@ -26,16 +26,27 @@ Since it's using PHP and MySQL, please visit [http://ianh.co.nf](http://ianh.co.
 <br>
 ---
 
-##Game 2 : Bubbles game
+##Game 2 : Bubble
 
-Under the construction<br>
+![Bubble Screenshot1](bubble/screenshot1.png)<br>
+![Bubble Screenshot2](bubble/screenshot2.png)<br>
 
-### Expected features
+###Single Play features
+- you have 60 seconds.
+- adds new line of bubbles after every certain turns.
+- 1 special bubble : bomb bubble.
+- 1 obstacle bubble adds randomly at the beginning of your turn.
+- Saves high scores in the database to see my rank and others score.
+- game over when bubbles goes over the border.
+
+![Bubble Screenshot3](bubble/screenshot3.png)<br>
+
+###Bettle Mode features
 - game over when bubble hit the ground.
 - adds new line of bubbles after every certain turns.
-- 5 different colors of bubbles.
-- 3 special bubbles : bomb, horizontal color changing and drill bubbles.
-- Saves high scores in the database to see my rank and others score.
+- 2 special bubbles : bomb bubble and horizontal color changing bubble.
+- obstacle bubble adds to the opponent when you pop more than 5 bubbles.
+- you lose when bubbles goes over your side border.
 
 <br>
 ---
