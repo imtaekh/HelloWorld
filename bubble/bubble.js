@@ -19,11 +19,9 @@ var bubble={
 		this.status = true;
 		this.menuGene("main");
 	},
-	isRectClick: function(x,y,width,height){
-		if(this.click && mouse.x>x && mouse.y>y && mouse.x<x+width && mouse.y<y+height){
-			this.click = false;
-			return true;
-		}
+	powerOff: function(){
+    gameOn = true;
+		this.status = false;
 	},
 	menu:{
 		status:false,
@@ -154,8 +152,7 @@ var bubble={
               this.rankGene();
     					break;
   					case 4: //Game exit
-    					this.exit();
-              this.
+    					this.powerOff();
     					break;
   					case 5: //Game exit
     					if(this.gameMode=="singleMode"){
@@ -210,587 +207,166 @@ var bubble={
 		}
 		ctx.restore();
 	},
-	exit: function(){
-    gameOn = true;
-		this.status = false;
-	},
-  bubbles: {
+  bubbles: { // 1, 4, 7, 10, 13 bubbles are not used on current version
     numberOfColor:4, width:32, height:32,
     0:{color: 0, sx:0, sy:482, special:null},
-    1:{color: 0, sx:0, sy:518, special:"bomb"},
+    // 1:{color: 0, sx:0, sy:518, special:"bomb"},
     2:{color: 0, sx:0, sy:554, special:"colorChange"},
     3:{color: 1, sx:36, sy:482, special:null},
-    4:{color: 1, sx:36, sy:518, special:"bomb"},
+    // 4:{color: 1, sx:36, sy:518, special:"bomb"},
     5:{color: 1, sx:36, sy:554, special:"colorChange"},
     6:{color: 2, sx:72, sy:482, special:null},
-    7:{color: 2, sx:72, sy:518, special:"bomb"},
+    // 7:{color: 2, sx:72, sy:518, special:"bomb"},
     8:{color: 2, sx:72, sy:554, special:"colorChange"},
     9:{color: 3, sx:108, sy:482, special:null},
-    10:{color: 3, sx:108, sy:518, special:"bomb"},
+    // 10:{color: 3, sx:108, sy:518, special:"bomb"},
     11:{color: 3, sx:108, sy:554, special:"colorChange"},
     12:{color: 4, sx:144, sy:482, special:null},
-    13:{color: 4, sx:144, sy:518, special:"bomb"},
+    // 13:{color: 4, sx:144, sy:518, special:"bomb"},
     14:{color: 4, sx:144, sy:554, special:"colorChange"},
     15:{color: 5, sx:180, sy:482, special:null},
     16:{color: 5, sx:180, sy:518, special:"bomb"},
     17:{color: 5, sx:180, sy:554, special:"colorChange"},
     99:{color: 99, sx:0, sy:590, special:"obstacle"},
   },
-  bubbleGenerator: function(){
-    var randNum=Math.random();
-    var type;
-    if(randNum<0.9){
-      type=0;
-    } else if(randNum<0.95){
-      type=1;
-      return 16;
-    } else {
-      if(this.gameMode=="singleMode"){
-        type=1;
-        return 16;
-      } else {
-        type=2;
-      }
-    }
-    return (Math.floor(Math.random()*this.bubbles.numberOfColor)*3+type);
-  },
-  bubbleReloader: function(){
-    switch(this.gameMode){
-      case "battleMode":
-        this.battle.player[this.battle.whoseTurn].curBubble.num=this.battle.player[this.battle.whoseTurn].nextBubble.num;
-        this.battle.player[this.battle.whoseTurn].nextBubble.num=this.battle.player[this.battle.whoseTurn].thirdBubble.num;
-        this.battle.player[this.battle.whoseTurn].thirdBubble.num=this.bubbleGenerator();
-        this.battle.player[this.battle.whoseTurn].curBubble.isShow=true;
-        break;
-      case "singleMode":
-        this.single.player.curBubble.num=this.single.player.nextBubble.num;
-        this.single.player.nextBubble.num=this.single.player.thirdBubble.num;
-        this.single.player.thirdBubble.num=this.bubbleGenerator();
-        this.single.player.curBubble.isShow=true;
-        break;
-      case "demoMode":
-        this.menu.instruction.player.curBubble.num=this.menu.instruction.player.nextBubble.num;
-        this.menu.instruction.player.nextBubble.num=this.menu.instruction.player.thirdBubble.num;
-        this.menu.instruction.player.thirdBubble.num=this.bubbleGenerator();
-        this.menu.instruction.player.curBubble.isShow=true;
-        break;
-    }
-
-  },
-  bubbleGlue: function(bubbleObj){
-    if(this.bubbles[bubbleObj.num].special !== "bomb"){
-      this.TargetPosition={xPos:null, yPos:null, distance:60};
-      for(var i=0;i<this.bubbleData.length;i++){
-        var offset=this.gapOffset(i);
-        for(var j=0; j<this.numOfColumn+offset; j++){
-          if(this.bubbleData[i][j].num===null){
-            if(distance(this.bubbleData[i][j], bubbleObj, "both")<this.TargetPosition.distance){
-              this.TargetPosition.distance =distance(this.bubbleData[i][j], bubbleObj, "both");
-              this.TargetPosition.xPos=j;
-              this.TargetPosition.yPos=i;
-            }
-          }
-        }
-      }
-    }
-
-    this.bubbleData[this.TargetPosition.yPos][this.TargetPosition.xPos].num = bubbleObj.num;
-    this.bubbleData[this.TargetPosition.yPos][this.TargetPosition.xPos].obstacleChecked = false;
-    this.bubbleAction(this.TargetPosition.yPos,this.TargetPosition.xPos);
-  },
-  bubbleGlueCheck: function(bubbleObj){
-    for(var i=0;i<this.bubbleData.length;i++){
-      var offset = this.gapOffset(i);
-      for(var j=0; j<this.numOfColumn+offset; j++){
-        if(this.bubbleData[i][j].num!==null){
-          if(distance(this.bubbleData[i][j], bubbleObj, "both")<=20||(distance(this.bubbleData[i][j], bubbleObj, "both")<=30 && Math.abs(this.bubbleMove.xVelocity/this.bubbleMove.yVelocity-(this.bubbleMove.x-this.bubbleData[i][j].x)/(this.bubbleMove.y-this.bubbleData[i][j].y))<=0.7)){
-//            dot(this.bubbleData[i][j].x,this.bubbleData[i][j].y,"blue");
-//            dot(bubbleObj.x,bubbleObj.y,"red");
-            this.TargetPosition.xPos=j;
-            this.TargetPosition.yPos=i;
-            glueIt(this);
-            return;
-          }
-        }
-      }
-    }
-    if(bubbleObj.y-16<=17){
-      glueIt(this);
-      return;
-    }
-    function glueIt(pointer){
-      pointer.bubbleGlue(bubbleObj);
-      if(bubbleObj.id !== undefined){
-        delete pointer.obstacleBubble[bubbleObj.id];
-      }else if(pointer.bubbleMove.status){
-        pointer.turnOver();
-      }
-    }
-  },
-  turnOver: function(){
-    this.bubbleMove.status=false;
-    this.fallingCheck();
-    this.bubbleReloader();
-    this.turnCount++;
-    var turnCicle = (this.gameMode=="battleMode")?9:5;
-    if(this.turnCount !== 0 && (this.turnCount+3)%turnCicle === 0) {
-      this.shakeGene(1, 5, 30);
-    } else if(this.turnCount !== 0 && (this.turnCount+1)%turnCicle === 0) {
-      this.shakeGene(1.5, 3, 50);
-    } else if(this.turnCount !== 0 && this.turnCount%turnCicle === 0) {
-      this.lineAdder();
-      this.shake.status = false;
-    }
-    if(this.gameMode=="battleMode"){
-      (this.battle.whoseTurn==1)?this.battle.whoseTurn=2:this.battle.whoseTurn=1;
-      if(this.bubbleFalling.count>4){
-        for(var i=0; i<(this.bubbleFalling.count-4)/4;i++){
-          var xPos=this.battle.player[this.battle.whoseTurn].borderLeft+(Math.random()*220);
-          this.obstacleBubbleGene(xPos);
-        }
-      }
-    }
-    if(this.gameMode=="singleMode"){
-      if(Math.random()<0.3){
-        var xPos=this.single.player.borderLeft+(Math.random()*220);
-        this.obstacleBubbleGene(xPos);
-      }
-      this.single.player.score += this.bubbleFalling.count*100;
-    }
-    this.bubbleFalling.count=0;
-    this.gameOverCheck();
-    oneHit(KEY_SPACE);
-    this.click = false;
-  },
-  bubbleAction:function(yOrigin,xOrigin){
-    var bubbleColor= Math.floor(this.bubbleData[yOrigin][xOrigin].num/3)*3;
-    switch (this.bubbles[this.bubbleData[yOrigin][xOrigin].num].special) {
-      case "colorChange":
-        var offset=this.gapOffset(yOrigin);
-        for(var j=0;j<this.numOfColumn+offset;j++){
-          if(j<xOrigin+4 && j > xOrigin-4){
-            this.bubbleData[yOrigin][j].num=bubbleColor;
-          }
-        }
-        break;
-      case "bomb":
-        this.bubbleData[yOrigin][xOrigin].isFalling=true;
-        var around=this.getAroundPosInfo(yOrigin,xOrigin);
-        for(var i =0; i<6; i++){
-          if(around[i].y >=0 && around[i].y < 12 ){
-            offset=this.gapOffset(i);
-            if(around[i].x >=0 && around[i].x < this.numOfColumn+offset){
-              if(this.bubbleData[around[i].y][around[i].x].num!== null){
-                this.bubbleData[around[i].y][around[i].x].num =15;
-                this.bubbleData[around[i].y][around[i].x].isFalling = true;
-              }
-            }
-            this.fallingProvoke();
-            this.unattachedCheck();
-          }
-        }
-        break;
-      case "obstacle":
-        break;
-      default:
-      this.bubbleCheck(yOrigin,xOrigin);
-    }
-  },
-  getAroundPosInfo: function(yOrigin,xOrigin){
-    var around={
-      0:{y:yOrigin, x:xOrigin-1},
-      3:{y:yOrigin, x:xOrigin+1},
-      };
-
-    if(this.bubbleData[yOrigin].isGap){
-      around[1]={y:yOrigin-1, x:xOrigin};
-      around[2]={y:yOrigin-1, x:xOrigin+1};
-      around[4]={y:yOrigin+1, x:xOrigin+1};
-      around[5]={y:yOrigin+1, x:xOrigin};
-    } else {
-      around[1]={y:yOrigin-1, x:xOrigin-1};
-      around[2]={y:yOrigin-1, x:xOrigin};
-      around[4]={y:yOrigin+1, x:xOrigin};
-      around[5]={y:yOrigin+1, x:xOrigin-1};
-    }
-    return around;
-  },
-  bubbleCheck:function(yOrigin,xOrigin){
-    this.bubbleData[yOrigin][xOrigin].isFalling=true;
-    var around=this.getAroundPosInfo(yOrigin,xOrigin);
-
-    for(var i =0; i<6; i++){
-      if(around[i].y >=0 && around[i].y < 12 ){
-        var offset=this.gapOffset(around[i].y);
-        if(around[i].x >=0 && around[i].x < this.numOfColumn+offset){
-          if(this.bubbleData[around[i].y][around[i].x].num==this.bubbleData[yOrigin][xOrigin].num && this.bubbleData[around[i].y][around[i].x].isFalling === false){
-            this.bubbleCheck(around[i].y,around[i].x);
-          }
-        }
-      }
-    }
-  },
-  obstacleCheck:function(yOrigin,xOrigin){
-    this.bubbleData[yOrigin][xOrigin].obstacleChecked=true;
-    var around=this.getAroundPosInfo(yOrigin,xOrigin);
-
-    for(var i =0; i<6; i++){
-      if(around[i].y >=0 && around[i].y < 12 ){
-        var offset=this.gapOffset(around[i].y);
-        if(around[i].x >=0 && around[i].x < this.numOfColumn+offset){
-          if(this.bubbleData[around[i].y][around[i].x].num==this.bubbleData[yOrigin][xOrigin].num && this.bubbleData[around[i].y][around[i].x].obstacleChecked === false){
-            this.obstacleCheck(around[i].y,around[i].x);
-          }
-          if(this.bubbleData[around[i].y][around[i].x].num==99){
-            this.bubbleData[around[i].y][around[i].x].isFalling=true;
-          }
-        }
-      }
-    }
-  },
-  fallingProvoke: function(){
-    for(i=0;i<this.bubbleData.length;i++){
-      var offset=this.gapOffset(i);
-      for(var j=0; j<this.numOfColumn+offset; j++){
-        if(this.bubbleData[i][j].num !== null && this.bubbleData[i][j].isFalling === true){
-          this.bubbleFallingGene(this.bubbleData[i][j].y,this.bubbleData[i][j].x,this.bubbleData[i][j].num);
-          this.bubbleData[i][j].num = null;
-          this.bubbleData[i][j].isFalling = false;
-
-        }
-      }
-    }
-  },
-  fallingCheck: function(){
-    var count=0;
-    for(var i=0;i<this.bubbleData.length;i++){
-      var offset=this.gapOffset(i);
-      for(var j=0; j<this.numOfColumn+offset; j++){
-        if(this.bubbleData[i][j].num !== null && this.bubbleData[i][j].isFalling === true){
-          count++;
-        }
-      }
-    }
-    if(count>3){
-      this.obstacleCheck(this.TargetPosition.yPos,this.TargetPosition.xPos);
-      this.fallingProvoke();
-      this.unattachedCheck();
-    } else {
-      for(var i=0;i<this.bubbleData.length;i++){
-        var offset=this.gapOffset(i);
-        for(var j=0; j<this.numOfColumn+offset; j++){
-          if(this.bubbleData[i][j].num !== null && this.bubbleData[i][j].isFalling === true){
-            this.bubbleData[i][j].isFalling = false;
-          }
-        }
-      }
-    }
-  },
-  unattachedCheck: function(){
-    for(var i=0;i<this.bubbleData.length;i++){
-      var offset=this.gapOffset(i);
-      for(var j=0; j<this.numOfColumn+offset; j++){
-        if(this.bubbleData[i][j].num !== null && this.bubbleData[i][j].isFalling === false){
-          this.bubbleData[i][j].isFalling=true;
-        }
-      }
-    }
-    var offset=this.gapOffset(0);
-    for(var j=0; j<this.numOfColumn+offset; j++){
-      if(this.bubbleData[0][j].num !== null && this.bubbleData[0][j].isFalling === true){
-        this.unattachedCheckRecursive(0,j);
-      }
-    }
-    this.fallingProvoke();
-  },
-  unattachedCheckRecursive: function(yOrigin,xOrigin){
-    this.bubbleData[yOrigin][xOrigin].isFalling=false;
-    var around=this.getAroundPosInfo(yOrigin,xOrigin);
-
-    for(var i =0; i<6; i++){
-      if(around[i].y >=0 && around[i].y < 12 ){
-        var offset = this.gapOffset(around[i].y);
-        if(around[i].x >=0 && around[i].x < this.numOfColumn+offset){
-          if(this.bubbleData[around[i].y][around[i].x].num !==null && this.bubbleData[around[i].y][around[i].x].isFalling === true){
-            this.unattachedCheckRecursive(around[i].y,around[i].x);
-          }
-        }
-      }
-    }
-  },
-  obstacleBubble: {},
-  obstacleBubbleReset: function(){
-    this.obstacleBubble = {};
-  },
-  obstacleBubbleGene: function(xOrigin){
-    for(var i=0; i<100; i++){
-      if(this.obstacleBubble[i]===undefined){
-        this.obstacleBubble[i]={id:i,num:99,xOrigin:xOrigin,x:xOrigin,y:HEIGHT+30+(Math.random()*50-25),yValocity:-2,xValocity:(Math.random()*4-2)};
-        break;
-      }
-    }
-  },
-  obstacleBubbleUpdate: function(){
-    for(var i=0; i<100; i++){
-      if(this.obstacleBubble[i]!==undefined){
-        this.obstacleBubble[i].y+=this.obstacleBubble[i].yValocity;
-        this.obstacleBubble[i].x+=this.obstacleBubble[i].xValocity;
-        this.obstacleBubble[i].yValocity-=gravity*2;
-        if(this.obstacleBubble[i].x<this.obstacleBubble[i].xOrigin-5 || this.obstacleBubble[i].x>this.obstacleBubble[i].xOrigin+5){
-          this.obstacleBubble[i].xValocity*= -1;
-        }
-        this.bubbleGlueCheck(this.obstacleBubble[i]);
-      }
-    }
-  },
-  obstacleBubbleDraw: function(){
-    for(var i=0; i<100; i++){
-      if(this.obstacleBubble[i]!==undefined){
-        ctx.drawImage(this.spriteSheet, this.bubbles[this.obstacleBubble[i].num].sx, this.bubbles[this.obstacleBubble[i].num].sy, this.bubbles.width, this.bubbles.height, this.obstacleBubble[i].x-16, this.obstacleBubble[i].y-16, this.bubbles.width, this.bubbles.height);
-      }
-    }
-  },
-  bubbleFalling: {count:0},
-  bubbleFallingReset: function(){
-    this.bubbleFalling = {count:0};
-  },
-  bubbleFallingGene: function(yOrigin, xOrigin, numOrigin){
-    for(var i=0; i<100; i++){
-      if(this.bubbleFalling[i]===undefined){
-        this.bubbleFalling[i]={num:numOrigin,x:xOrigin,y:yOrigin,yValocity:-Math.random()*4,xValocity:Math.random()*6-3};
-        this.bubbleFalling.count++;
-        break;
-      }
-    }
-  },
-  bubbleFallingUpdate: function(){
-    for(var i=0; i<100; i++){
-      if(this.bubbleFalling[i]!==undefined){
-        this.bubbleFalling[i].y+=this.bubbleFalling[i].yValocity;
-        this.bubbleFalling[i].x+=this.bubbleFalling[i].xValocity;
-        this.bubbleFalling[i].yValocity+=gravity;
-        if(this.bubbleFalling[i].y>WIDTH+16){
-          delete this.bubbleFalling[i];
-        }
-      }
-    }
-  },
-  bubbleFallingDraw: function(){
-    for(var i=0; i<100; i++){
-      if(this.bubbleFalling[i]!==undefined){
-        ctx.drawImage(this.spriteSheet, this.bubbles[this.bubbleFalling[i].num].sx, this.bubbles[this.bubbleFalling[i].num].sy, this.bubbles.width, this.bubbles.height, this.bubbleFalling[i].x-16, this.bubbleFalling[i].y-16, this.bubbles.width, this.bubbles.height);
-      }
-    }
-  },
-  bubbleMove:{
-    status: false,
-    x: undefined,
-    y: undefined,
-    num: undefined,
-    velocity: 10,
-    xVelocity: undefined,
-    yVelocity: undefined,
-    borderLeft: undefined,
-    borderRight: undefined
-  },
-  bubbleMoveGene: function(player){
-    this.bubbleMove.status=true;
-    this.bubbleMove.x = player.curBubble.x;
-    this.bubbleMove.y = player.curBubble.y;
-    this.bubbleMove.num = player.curBubble.num;
-    this.bubbleMove.borderLeft = player.borderLeft;
-    this.bubbleMove.borderRight = this.bubbleMove.borderLeft+238;
-    this.bubbleMove.yVelocity=Number(Math.sin(player.arrow.angle*Math.PI/180-1/2*Math.PI)).toFixed(2)*this.bubbleMove.velocity;
-    this.bubbleMove.xVelocity=Number(Math.cos(player.arrow.angle*Math.PI/180-1/2*Math.PI)).toFixed(2)*this.bubbleMove.velocity;
-  },
-  bubbleMoveUpdate: function(){
-    if(this.menu.instruction.status){
-      if(this.bubbleMove.y<0||this.bubbleMove.x<0||this.bubbleMove.x>WIDTH){
-        this.bubbleMove.status=false;
-        this.bubbleReloader();
-      }
-    }else {
-      if(this.bubbleMove.x-16<this.bubbleMove.borderLeft){
-        this.bubbleMove.x=this.bubbleMove.borderLeft+16;
-        this.bubbleMove.xVelocity*=(-1);
-      } else if(this.bubbleMove.x+16>this.bubbleMove.borderRight){
-        this.bubbleMove.x=this.bubbleMove.borderRight-16;
-        this.bubbleMove.xVelocity*=(-1);
-      }
-      this.bubbleGlueCheck(this.bubbleMove);
-    }
-    this.bubbleMove.x+=this.bubbleMove.xVelocity;
-    this.bubbleMove.y+=this.bubbleMove.yVelocity;
-  },
-  bubbleMoveDraw: function(){
-    ctx.drawImage(this.spriteSheet, this.bubbles[this.bubbleMove.num].sx, this.bubbles[this.bubbleMove.num].sy, this.bubbles.width, this.bubbles.height, this.bubbleMove.x-16, this.bubbleMove.y-16, this.bubbles.width, this.bubbles.height);
-  },
-  gapOffset: function(lineNum){
-    var offset=0;
-    if (this.bubbleData[lineNum].isGap){
-      offset= -1;
-    }
-    return offset;
-  },
-  lineAdder: function(){
-    var x=76+16;
-    var y=15+16;
-    var xPosOffset=0;
-    for(var i=this.bubbleData.length-1; i>0; i--){
-      this.bubbleData[i]=this.bubbleData[i-1];
-      var offset = this.gapOffset(i);
-      for(var j=0;j<this.numOfColumn+offset;j++){
-        this.bubbleData[i][j].y=y+i*28;
-      }
-    }
-    this.bubbleData[0]={};
-    if(this.bubbleData[1].isGap){
-      this.bubbleData[0].isGap=false;
-    } else{
-      this.bubbleData[0].isGap=true;
-      xPosOffset=16;
-    }
-    for(var j=0; j<this.numOfColumn+this.gapOffset(0); j++){
-      this.bubbleData[0][j]={};
-      if(j==13 && this.bubbleData[0].isGap){
-        this.bubbleData[0][j].num=null;
-      } else {
-        this.bubbleData[0][j].num=Math.floor(Math.random()*this.bubbles.numberOfColor)*3;
-      }
-      this.bubbleData[0][j].obstacleChecked=false;
-      this.bubbleData[0][j].isFalling=false;
-      this.bubbleData[0][j].x=x+j*32+xPosOffset;
-      this.bubbleData[0][j].y=y+i*28;
-    }
-    this.gameOverCheck();
-  },
-  gameOverCheck: function(){
-    var lastRow=bubble.bubbleData.length-1;
-      var offset=this.gapOffset(lastRow);
-    switch(this.gameMode){
-      case "battleMode":
-        var isP1Lose=false, isP2Lose=false;
-        for(var j=0; j<this.numOfColumn+offset; j++){
-          if(this.bubbleData[lastRow][j].num !== null){
-            if(j<7+offset){
-              isP1Lose=true;
-            }else if(j>6){
-              isP2Lose=true;
-            }
-          }
-        }
-        if(isP1Lose&&isP2Lose){
-          this.gameOverGene("Draw!");
-        }else if(isP1Lose){
-          this.gameOverGene("Player 2 Win!");
-        }else if(isP2Lose){
-          this.gameOverGene("Player 1 Win!");
-        }
-        break;
-      case "singleMode":
-        for(var j=0; j<this.numOfColumn+offset; j++){
-          if(this.bubbleData[lastRow][j].num !== null){
-          this.gameOverGene(this.single.player.score);
-          }
-        }
-        break;
-    }
-  },
-  gameOver:{
-    count:undefined,
-    COUNT_MAX:100,
-    status:undefined,
-    result:{
-      status:undefined,
-      string:undefined,
-      x:300,
-      y:150,
-      size: undefined,
-      transparent: undefined,
+  single: {
+    status:false,
+    background: {
+      num: undefined,
+      maxNum: 1,
+      0:{ x:76, y:15, sx:35, sy:0, width:128, height:186 }
     },
-    headLine:{
-      string: "GAME OVER",
-      x: 300,
-      y: 100,
-      size: undefined
-    }
+    gameFrame: { x:64, y:3, sx:0, sy:84, width:280, height:394 },
+    luncher: { x:76, y:317, sx:236, sy:482, width:256, height:68 },
+    player: {
+      score: undefined,
+      arrow: { angle: 0, x:196, y:304, sx:216, sy:482, width:16, height:80 },
+      borderLeft: 77,
+      curBubble:{ isShow:true, num:undefined, x:204, y:347 },
+      nextBubble:{ num:undefined, x:169, y:369 },
+      thirdBubble:{ num:2, x:130, y:369 }
+    },
+    bubbleData: undefined,
   },
-  gameOverGene: function(str){
-    this.gameOver.status = true;
-    this.gameOver.result.status = false;
-    this.gameOver.result.size = 0;
-    this.gameOver.result.string = str;
-    this.gameOver.headLine.size = 0;
-    this.gameOver.count = 0;
-    if(this.gameMode=="singleMode"){
-      postInfo("bubble/saveScore.php",name,this.single.player.score);
-    }
-  },
-  gameOverUpdate: function(){
-    if(this.gameOver.count<this.gameOver.COUNT_MAX){
-      this.gameOver.count++;
-      this.gameOver.headLine.size=20+this.gameOver.count*0.3;
-    }
-    if(this.gameOver.count>29 && this.gameOver.count<81){
-      if(this.gameOver.count<61){
-        this.gameOver.result.transparent=1-(60-this.gameOver.count)/30;
+  singleGene: function(){
+    this.single.status = true;
+    this.countdown.status = false;
+    this.gameMode = "singleMode";
+    this.numOfColumn = 8;
+    this.turnCount = 0;
+    this.shake.status = false;
+    this.gameOver.status = false;
+    this.single.background.num=Math.floor(Math.random()*this.single.background.maxNum);
+    this.single.player.curBubble.num=this.bubbleGenerator();
+    this.single.player.nextBubble.num=this.bubbleGenerator();
+    this.single.player.thirdBubble.num=this.bubbleGenerator();
+    this.single.player.arrow.angle=0;
+    this.single.player.score=0;
+    this.single.bubbleData=new Array(12);
+    for(var i=0;i<this.single.bubbleData.length;i++){
+      this.single.bubbleData[i]={};
+      var gapOffset=0;
+      var xPosOffset=0;
+      if(i%2 === 0){
+        this.single.bubbleData[i].isGap=false;
+      } else {
+        this.single.bubbleData[i].isGap=true;
+        xPosOffset=16;
       }
-      this.gameOver.result.status=true;
-      this.gameOver.result.size=30+this.gameOver.count*0.1;
+      var x=76+16;
+      var y=15+16;
+      if(i<3){
+        for(var j=0; j<this.numOfColumn; j++){
+          this.single.bubbleData[i][j]={};
+          if(j==13 && this.single.bubbleData[i].isGap){
+            this.single.bubbleData[i][j].num=null;
+          } else {
+            this.single.bubbleData[i][j].num=Math.floor(Math.random()*this.bubbles.numberOfColor)*3;
+          }
+          this.single.bubbleData[i][j].isFalling=false;
+          this.single.bubbleData[i][j].x=x+j*32+xPosOffset;
+          this.single.bubbleData[i][j].y=y+i*28;
+          this.single.bubbleData[i][j].obstacleChecked=false;
+        }
+      } else{
+        for(var j=0; j<this.numOfColumn; j++){
+          this.single.bubbleData[i][j]={};
+          this.single.bubbleData[i][j].num=null;
+          this.single.bubbleData[i][j].isFalling=false;
+          this.single.bubbleData[i][j].x=x+j*32+xPosOffset;
+          this.single.bubbleData[i][j].y=y+i*28;
+          this.single.bubbleData[i][j].obstacleChecked=false;
+        }
+      }
+      this.bubbleData = this.single.bubbleData;
     }
-    if(this.gameOver.count ==70){
-      this.click=false;
-      this.menuGene(this.gameMode);
-    }
-
+    oneHit(KEY_SPACE);
+    this.timerGene();
   },
-  gameOverDraw: function(){
+  singleDraw: function(){
     ctx.save();
-		ctx.fillStyle="rgba(0,0,0,0.5)";
-		ctx.fillRect(0,0,WIDTH,HEIGHT);
-		ctx.textAlign="center";
-		ctx.font=this.gameOver.headLine.size+"px Arial";
+    //black background & gamebBackground & stage frame
+    ctx.fillStyle = "rgba(0,0,0,0.7)";
+    ctx.fillRect(0,0,WIDTH,HEIGHT);
+    ctx.drawImage(this.backgroundSheet, this.single.background[this.single.background.num].sx, this.single.background[this.single.background.num].sy, this.single.background[this.single.background.num].width, this.single.background[this.single.background.num].height, this.single.background[this.single.background.num].x, this.single.background[this.single.background.num].y, this.single.background[this.single.background.num].width*2, this.single.background[this.single.background.num].height*2);
+    ctx.drawImage(this.spriteSheet, this.single.gameFrame.sx, this.single.gameFrame.sy, this.single.gameFrame.width, this.single.gameFrame.height, this.single.gameFrame.x, this.single.gameFrame.y, this.single.gameFrame.width, this.single.gameFrame.height);
+    ctx.drawImage(this.spriteSheet, this.single.luncher.sx, this.single.luncher.sy, this.single.luncher.width, this.single.luncher.height, this.single.luncher.x, this.single.luncher.y, this.single.luncher.width, this.single.luncher.height);
+    //gameBubbles
+    var shakeOffset=0;
+    if(this.shake.status && this.gameOver.status !== true){
+      shakeOffset=this.shake.offset;
+    }
+    for(var i=0;i<this.single.bubbleData.length;i++){
+      var offset = this.gapOffset(i);
+      for(var j=0; j<this.numOfColumn+offset; j++){
+        if(this.single.bubbleData[i][j].num!==null){
+          ctx.drawImage(this.spriteSheet, this.bubbles[this.single.bubbleData[i][j].num].sx, this.bubbles[this.single.bubbleData[i][j].num].sy, this.bubbles.width, this.bubbles.height, this.single.bubbleData[i][j].x-16+shakeOffset, this.single.bubbleData[i][j].y-16, this.bubbles.width, this.bubbles.height);
+        }
+      }
+    }
+    //player arrow & bubbles
+    ctx.save();
+    ctx.translate(this.single.player.arrow.x+8,this.single.player.arrow.y+44);
+    ctx.rotate(this.single.player.arrow.angle*Math.PI/180);
+    ctx.drawImage(this.spriteSheet, this.single.player.arrow.sx, this.single.player.arrow.sy, this.single.player.arrow.width, this.single.player.arrow.height, -8, -44, this.single.player.arrow.width, this.single.player.arrow.height);
+    ctx.restore();
+    if(this.single.player.curBubble.isShow) ctx.drawImage(this.spriteSheet, this.bubbles[this.single.player.curBubble.num].sx, this.bubbles[this.single.player.curBubble.num].sy, this.bubbles.width, this.bubbles.height, this.single.player.curBubble.x-16, this.single.player.curBubble.y-16, this.bubbles.width, this.bubbles.height);
+    ctx.drawImage(this.spriteSheet, this.bubbles[this.single.player.nextBubble.num].sx, this.bubbles[this.single.player.nextBubble.num].sy, this.bubbles.width, this.bubbles.height, this.single.player.nextBubble.x-16, this.single.player.nextBubble.y-16, this.bubbles.width, this.bubbles.height);
+    ctx.drawImage(this.spriteSheet, this.bubbles[this.single.player.thirdBubble.num].sx, this.bubbles[this.single.player.thirdBubble.num].sy, this.bubbles.width, this.bubbles.height, this.single.player.thirdBubble.x-16, this.single.player.thirdBubble.y-16, this.bubbles.width, this.bubbles.height);
+    //score
+		ctx.font="25px Arial";
     ctx.strokeStyle="rgb(0,0,0)";
     ctx.lineWidth=5;
-		ctx.strokeText(this.gameOver.headLine.string, this.gameOver.headLine.x, this.gameOver.headLine.y);
 		ctx.fillStyle="rgb(255,255,255)";
-		ctx.fillText(this.gameOver.headLine.string, this.gameOver.headLine.x, this.gameOver.headLine.y);
-    if(this.gameOver.result.status){
-      ctx.font=this.gameOver.result.size+"px Arial";
-      ctx.strokeStyle="rgba(0,0,0,"+this.gameOver.result.transparent+")";
-      ctx.lineWidth=5;
-  		ctx.strokeText(this.gameOver.result.string, this.gameOver.result.x, this.gameOver.result.y);
-      ctx.fillStyle="rgba(255,255,255,"+this.gameOver.result.transparent+")";
-      ctx.fillText(this.gameOver.result.string, this.gameOver.result.x, this.gameOver.result.y);
-    }
+		ctx.textAlign="left";
+    ctx.strokeText("YOUR SCORE", 360, 80);
+		ctx.fillText("YOUR SCORE", 360, 80);
+		ctx.textAlign="right";
+    ctx.strokeText(this.single.player.score, 570, 120);
+		ctx.fillText(this.single.player.score, 570, 120);
     ctx.restore();
   },
-  shake:{
-    status: false,
-    offset: 0,
-    count: undefined,
-    power: undefined,
-    duration: undefined,
-    COUNT_MAX: 100
-  },
-  shakeGene: function(power, speed, duration){
-    this.shake.status = true;
-    this.shake.offset = 0;
-    this.shake.power = power;
-    this.shake.speed = speed;
-    this.shake.duration = duration;
-    this.shake.count = 100;
-  },
-  shakeUpdate: function(){
-    if(this.shake.count>0){
-      this.shake.count--;
-    } else {
-      this.shake.count = this.shake.COUNT_MAX;
+  singleUpdate: function(){
+    this.bubbleFallingDraw();
+    this.bubbleFallingUpdate();
+    this.obstacleBubbleDraw();
+    this.obstacleBubbleUpdate();
+    this.timerDraw();
+    if(this.timer.timeLeft<6&&this.timer.timeLeft != this.countdown.string){
+      this.countdownGene(this.timer.timeLeft);
     }
-    if(this.shake.count>100-this.shake.duration && this.shake.count%this.shake.speed === 0){
-      this.shake.offset=(this.shake.offset==this.shake.power)?(-this.shake.power):(this.shake.power);
-    } else {
-      this.shake.offset=0;
+    if(this.gameOver.status !== true){
+      this.timerUpdate();
+    }
+    if(this.countdown.status){
+      this.countdownDraw();
+      this.countdownUpdate();
+    }
+    if(this.timer.timeLeft==0 && this.gameOver.status !== true){
+      this.gameOverGene(this.single.player.score);
+    }
+    if(bubble.gameOver.status !== true){
+      this.control(this.single.player);
     }
   },
   battle: {
@@ -945,6 +521,46 @@ var bubble={
       this.control(this.battle.player[this.battle.whoHasControl]);
     }
   },
+  bubbleGenerator: function(){
+    var randNum=Math.random();
+    var type;
+    if(randNum<0.9){
+      type=0;
+    } else if(randNum<0.95){
+      type=1;
+      return 16;
+    } else {
+      if(this.gameMode=="singleMode"){
+        type=1;
+        return 16;
+      } else {
+        type=2;
+      }
+    }
+    return (Math.floor(Math.random()*this.bubbles.numberOfColor)*3+type);
+  },
+  bubbleReloader: function(){
+    switch(this.gameMode){
+      case "battleMode":
+        this.battle.player[this.battle.whoseTurn].curBubble.num=this.battle.player[this.battle.whoseTurn].nextBubble.num;
+        this.battle.player[this.battle.whoseTurn].nextBubble.num=this.battle.player[this.battle.whoseTurn].thirdBubble.num;
+        this.battle.player[this.battle.whoseTurn].thirdBubble.num=this.bubbleGenerator();
+        this.battle.player[this.battle.whoseTurn].curBubble.isShow=true;
+        break;
+      case "singleMode":
+        this.single.player.curBubble.num=this.single.player.nextBubble.num;
+        this.single.player.nextBubble.num=this.single.player.thirdBubble.num;
+        this.single.player.thirdBubble.num=this.bubbleGenerator();
+        this.single.player.curBubble.isShow=true;
+        break;
+      case "demoMode":
+        this.menu.instruction.player.curBubble.num=this.menu.instruction.player.nextBubble.num;
+        this.menu.instruction.player.nextBubble.num=this.menu.instruction.player.thirdBubble.num;
+        this.menu.instruction.player.thirdBubble.num=this.bubbleGenerator();
+        this.menu.instruction.player.curBubble.isShow=true;
+        break;
+    }
+  },
   control: function(player){
     if(touch.status){
       this.angleTouchOffset=(touch.endX - touch.startX)/5;
@@ -975,26 +591,523 @@ var bubble={
       this.angleOriginal = -75-this.angleTouchOffset;
     }
   },
-  single: {
-    status:false,
-    background: {
-      num: undefined,
-      maxNum: 1,
-      0:{ x:76, y:15, sx:35, sy:0, width:128, height:186 }
-    },
-    gameFrame: { x:64, y:3, sx:0, sy:84, width:280, height:394 },
-    luncher: { x:76, y:317, sx:236, sy:482, width:256, height:68 },
-    player: {
-      score: undefined,
-      arrow: { angle: 0, x:196, y:304, sx:216, sy:482, width:16, height:80 },
-      borderLeft: 77,
-      curBubble:{ isShow:true, num:undefined, x:204, y:347 },
-      nextBubble:{ num:undefined, x:169, y:369 },
-      thirdBubble:{ num:2, x:130, y:369 }
-    },
-    bubbleData: undefined,
+  bubbleMove:{
+    status: false,
+    x: undefined,
+    y: undefined,
+    num: undefined,
+    velocity: 10,
+    xVelocity: undefined,
+    yVelocity: undefined,
+    borderLeft: undefined,
+    borderRight: undefined
   },
-  timer:{
+  bubbleMoveGene: function(player){
+    this.bubbleMove.status=true;
+    this.bubbleMove.x = player.curBubble.x;
+    this.bubbleMove.y = player.curBubble.y;
+    this.bubbleMove.num = player.curBubble.num;
+    this.bubbleMove.borderLeft = player.borderLeft;
+    this.bubbleMove.borderRight = this.bubbleMove.borderLeft+238;
+    this.bubbleMove.yVelocity=Number(Math.sin(player.arrow.angle*Math.PI/180-1/2*Math.PI)).toFixed(2)*this.bubbleMove.velocity;
+    this.bubbleMove.xVelocity=Number(Math.cos(player.arrow.angle*Math.PI/180-1/2*Math.PI)).toFixed(2)*this.bubbleMove.velocity;
+  },
+  bubbleMoveUpdate: function(){
+    if(this.menu.instruction.status){
+      if(this.bubbleMove.y<0||this.bubbleMove.x<0||this.bubbleMove.x>WIDTH){
+        this.bubbleMove.status=false;
+        this.bubbleReloader();
+      }
+    }else {
+      if(this.bubbleMove.x-16<this.bubbleMove.borderLeft){
+        this.bubbleMove.x=this.bubbleMove.borderLeft+16;
+        this.bubbleMove.xVelocity*=(-1);
+      } else if(this.bubbleMove.x+16>this.bubbleMove.borderRight){
+        this.bubbleMove.x=this.bubbleMove.borderRight-16;
+        this.bubbleMove.xVelocity*=(-1);
+      }
+      this.bubbleGlueCheck(this.bubbleMove);
+    }
+    this.bubbleMove.x+=this.bubbleMove.xVelocity;
+    this.bubbleMove.y+=this.bubbleMove.yVelocity;
+  },
+  bubbleMoveDraw: function(){
+    ctx.drawImage(this.spriteSheet, this.bubbles[this.bubbleMove.num].sx, this.bubbles[this.bubbleMove.num].sy, this.bubbles.width, this.bubbles.height, this.bubbleMove.x-16, this.bubbleMove.y-16, this.bubbles.width, this.bubbles.height);
+  },
+  bubbleGlueCheck: function(bubbleObj){
+    for(var i=0;i<this.bubbleData.length;i++){
+      var offset = this.gapOffset(i);
+      for(var j=0; j<this.numOfColumn+offset; j++){
+        if(this.bubbleData[i][j].num!==null){
+          if(distance(this.bubbleData[i][j], bubbleObj, "both")<=20||(distance(this.bubbleData[i][j], bubbleObj, "both")<=30 && Math.abs(this.bubbleMove.xVelocity/this.bubbleMove.yVelocity-(this.bubbleMove.x-this.bubbleData[i][j].x)/(this.bubbleMove.y-this.bubbleData[i][j].y))<=0.7)){
+//            dot(this.bubbleData[i][j].x,this.bubbleData[i][j].y,"blue");
+//            dot(bubbleObj.x,bubbleObj.y,"red");
+            this.TargetPosition.xPos=j;
+            this.TargetPosition.yPos=i;
+            glueIt(this);
+            return;
+          }
+        }
+      }
+    }
+    if(bubbleObj.y-16<=17){
+      glueIt(this);
+      return;
+    }
+    function glueIt(pointer){
+      pointer.bubbleGlue(bubbleObj);
+      if(bubbleObj.id !== undefined){ //which means bubbleObj has id#, it means it's an obstacleBubble, not a normal bubble
+        delete pointer.obstacleBubble[bubbleObj.id];
+      }else if(pointer.bubbleMove.status){
+        pointer.turnOver();
+      }
+    }
+  },
+  bubbleGlue: function(bubbleObj){
+    if(this.bubbles[bubbleObj.num].special !== "bomb"){
+      this.TargetPosition={xPos:null, yPos:null, distance:60};
+      for(var i=0;i<this.bubbleData.length;i++){
+        var offset=this.gapOffset(i);
+        for(var j=0; j<this.numOfColumn+offset; j++){
+          if(this.bubbleData[i][j].num===null){
+            if(distance(this.bubbleData[i][j], bubbleObj, "both")<this.TargetPosition.distance){
+              this.TargetPosition.distance =distance(this.bubbleData[i][j], bubbleObj, "both");
+              this.TargetPosition.xPos=j;
+              this.TargetPosition.yPos=i;
+            }
+          }
+        }
+      }
+    }
+
+    this.bubbleData[this.TargetPosition.yPos][this.TargetPosition.xPos].num = bubbleObj.num;
+    this.bubbleData[this.TargetPosition.yPos][this.TargetPosition.xPos].obstacleChecked = false;
+    this.bubbleAction(this.TargetPosition.yPos,this.TargetPosition.xPos);
+  },
+  bubbleAction:function(yOrigin,xOrigin){
+    var bubbleColor= Math.floor(this.bubbleData[yOrigin][xOrigin].num/3)*3;
+    switch (this.bubbles[this.bubbleData[yOrigin][xOrigin].num].special) {
+      case "colorChange":
+        var offset=this.gapOffset(yOrigin);
+        for(var j=0;j<this.numOfColumn+offset;j++){
+          if(j<xOrigin+4 && j > xOrigin-4){
+            this.bubbleData[yOrigin][j].num=bubbleColor;
+          }
+        }
+        break;
+      case "bomb":
+        this.bubbleData[yOrigin][xOrigin].isFalling=true;
+        var around=this.getAroundPosInfo(yOrigin,xOrigin);
+        for(var i =0; i<6; i++){
+          if(around[i].y >=0 && around[i].y < 12 ){
+            offset=this.gapOffset(i);
+            if(around[i].x >=0 && around[i].x < this.numOfColumn+offset){
+              if(this.bubbleData[around[i].y][around[i].x].num!== null){
+                this.bubbleData[around[i].y][around[i].x].num =15;
+                this.bubbleData[around[i].y][around[i].x].isFalling = true;
+              }
+            }
+            this.fallingProvoke();
+            this.unattachedCheck();
+          }
+        }
+        break;
+      case "obstacle":
+        break;
+      default:
+      this.bubbleColorCheck(yOrigin,xOrigin);
+    }
+  },
+  bubbleColorCheck:function(yOrigin,xOrigin){
+    this.bubbleData[yOrigin][xOrigin].isFalling=true;
+    var around=this.getAroundPosInfo(yOrigin,xOrigin);
+
+    for(var i =0; i<6; i++){
+      if(around[i].y >=0 && around[i].y < 12 ){
+        var offset=this.gapOffset(around[i].y);
+        if(around[i].x >=0 && around[i].x < this.numOfColumn+offset){
+          if(this.bubbleData[around[i].y][around[i].x].num==this.bubbleData[yOrigin][xOrigin].num && this.bubbleData[around[i].y][around[i].x].isFalling === false){
+            this.bubbleColorCheck(around[i].y,around[i].x);
+          }
+        }
+      }
+    }
+  },
+  turnOver: function(){
+    this.bubbleMove.status=false;
+    this.fallingCheck();
+    this.bubbleReloader();
+    this.turnCount++;
+    var turnCicle = (this.gameMode=="battleMode")?9:5;
+    if(this.turnCount !== 0 && (this.turnCount+3)%turnCicle === 0) {
+      this.shakeGene(1, 5, 30);
+    } else if(this.turnCount !== 0 && (this.turnCount+1)%turnCicle === 0) {
+      this.shakeGene(1.5, 3, 50);
+    } else if(this.turnCount !== 0 && this.turnCount%turnCicle === 0) {
+      this.lineAdder();
+      this.shake.status = false;
+    }
+    if(this.gameMode=="battleMode"){
+      (this.battle.whoseTurn==1)?this.battle.whoseTurn=2:this.battle.whoseTurn=1;
+      if(this.bubbleFalling.count>4){
+        for(var i=0; i<(this.bubbleFalling.count-4)/4;i++){
+          var xPos=this.battle.player[this.battle.whoseTurn].borderLeft+(Math.random()*220);
+          this.obstacleBubbleGene(xPos);
+        }
+      }
+    }
+    if(this.gameMode=="singleMode"){
+      if(Math.random()<0.3){
+        var xPos=this.single.player.borderLeft+(Math.random()*220);
+        this.obstacleBubbleGene(xPos);
+      }
+      this.single.player.score += this.bubbleFalling.count*100;
+    }
+    this.bubbleFalling.count=0;
+    this.gameOverCheck();
+    oneHit(KEY_SPACE);
+    this.click = false;
+  },
+  fallingCheck: function(){
+    var count=0;
+    for(var i=0;i<this.bubbleData.length;i++){
+      var offset=this.gapOffset(i);
+      for(var j=0; j<this.numOfColumn+offset; j++){
+        if(this.bubbleData[i][j].num !== null && this.bubbleData[i][j].isFalling === true){
+          count++;
+        }
+      }
+    }
+    if(count>3){
+      this.obstacleCheck(this.TargetPosition.yPos,this.TargetPosition.xPos);
+      this.fallingProvoke();
+      this.unattachedCheck();
+    } else {
+      for(var i=0;i<this.bubbleData.length;i++){
+        var offset=this.gapOffset(i);
+        for(var j=0; j<this.numOfColumn+offset; j++){
+          if(this.bubbleData[i][j].num !== null && this.bubbleData[i][j].isFalling === true){
+            this.bubbleData[i][j].isFalling = false;
+          }
+        }
+      }
+    }
+  },
+  fallingProvoke: function(){
+    for(i=0;i<this.bubbleData.length;i++){
+      var offset=this.gapOffset(i);
+      for(var j=0; j<this.numOfColumn+offset; j++){
+        if(this.bubbleData[i][j].num !== null && this.bubbleData[i][j].isFalling === true){
+          this.bubbleFallingGene(this.bubbleData[i][j].y,this.bubbleData[i][j].x,this.bubbleData[i][j].num);
+          this.bubbleData[i][j].num = null;
+          this.bubbleData[i][j].isFalling = false;
+
+        }
+      }
+    }
+  },
+  obstacleCheck:function(yOrigin,xOrigin){
+    this.bubbleData[yOrigin][xOrigin].obstacleChecked=true;
+    var around=this.getAroundPosInfo(yOrigin,xOrigin);
+
+    for(var i =0; i<6; i++){
+      if(around[i].y >=0 && around[i].y < 12 ){
+        var offset=this.gapOffset(around[i].y);
+        if(around[i].x >=0 && around[i].x < this.numOfColumn+offset){
+          if(this.bubbleData[around[i].y][around[i].x].num==this.bubbleData[yOrigin][xOrigin].num && this.bubbleData[around[i].y][around[i].x].obstacleChecked === false){
+            this.obstacleCheck(around[i].y,around[i].x);
+          }
+          if(this.bubbleData[around[i].y][around[i].x].num==99){
+            this.bubbleData[around[i].y][around[i].x].isFalling=true;
+          }
+        }
+      }
+    }
+  },
+  unattachedCheck: function(){
+    for(var i=0;i<this.bubbleData.length;i++){
+      var offset=this.gapOffset(i);
+      for(var j=0; j<this.numOfColumn+offset; j++){
+        if(this.bubbleData[i][j].num !== null && this.bubbleData[i][j].isFalling === false){
+          this.bubbleData[i][j].isFalling=true;
+        }
+      }
+    }
+    var offset=this.gapOffset(0);
+    for(var j=0; j<this.numOfColumn+offset; j++){
+      if(this.bubbleData[0][j].num !== null && this.bubbleData[0][j].isFalling === true){
+        this.unattachedCheckRecursive(0,j);
+      }
+    }
+    this.fallingProvoke();
+  },
+  unattachedCheckRecursive: function(yOrigin,xOrigin){
+    this.bubbleData[yOrigin][xOrigin].isFalling=false;
+    var around=this.getAroundPosInfo(yOrigin,xOrigin);
+
+    for(var i =0; i<6; i++){
+      if(around[i].y >=0 && around[i].y < 12 ){
+        var offset = this.gapOffset(around[i].y);
+        if(around[i].x >=0 && around[i].x < this.numOfColumn+offset){
+          if(this.bubbleData[around[i].y][around[i].x].num !==null && this.bubbleData[around[i].y][around[i].x].isFalling === true){
+            this.unattachedCheckRecursive(around[i].y,around[i].x);
+          }
+        }
+      }
+    }
+  },
+  bubbleFalling: {count:0}, // count is for battle mode to generate obstacle bubbles
+  bubbleFallingReset: function(){
+    this.bubbleFalling = {count:0};
+  },
+  bubbleFallingGene: function(yOrigin, xOrigin, numOrigin){
+    for(var i=0; i<100; i++){
+      if(this.bubbleFalling[i]===undefined){
+        this.bubbleFalling[i]={num:numOrigin,x:xOrigin,y:yOrigin,yValocity:-Math.random()*4,xValocity:Math.random()*6-3};
+        this.bubbleFalling.count++;
+        break;
+      }
+    }
+  },
+  bubbleFallingUpdate: function(){
+    for(var i=0; i<100; i++){
+      if(this.bubbleFalling[i]!==undefined){
+        this.bubbleFalling[i].y+=this.bubbleFalling[i].yValocity;
+        this.bubbleFalling[i].x+=this.bubbleFalling[i].xValocity;
+        this.bubbleFalling[i].yValocity+=gravity;
+        if(this.bubbleFalling[i].y>WIDTH+16){
+          delete this.bubbleFalling[i];
+        }
+      }
+    }
+  },
+  bubbleFallingDraw: function(){
+    for(var i=0; i<100; i++){
+      if(this.bubbleFalling[i]!==undefined){
+        ctx.drawImage(this.spriteSheet, this.bubbles[this.bubbleFalling[i].num].sx, this.bubbles[this.bubbleFalling[i].num].sy, this.bubbles.width, this.bubbles.height, this.bubbleFalling[i].x-16, this.bubbleFalling[i].y-16, this.bubbles.width, this.bubbles.height);
+      }
+    }
+  },
+  obstacleBubble: {},
+  obstacleBubbleReset: function(){
+    this.obstacleBubble = {};
+  },
+  obstacleBubbleGene: function(xOrigin){
+    for(var i=0; i<100; i++){
+      if(this.obstacleBubble[i]===undefined){
+        this.obstacleBubble[i]={id:i,num:99,xOrigin:xOrigin,x:xOrigin,y:HEIGHT+30+(Math.random()*50-25),yValocity:-2,xValocity:(Math.random()*4-2)};
+        break;
+      }
+    }
+  },
+  obstacleBubbleUpdate: function(){
+    for(var i=0; i<100; i++){
+      if(this.obstacleBubble[i]!==undefined){
+        this.obstacleBubble[i].y+=this.obstacleBubble[i].yValocity;
+        this.obstacleBubble[i].x+=this.obstacleBubble[i].xValocity;
+        this.obstacleBubble[i].yValocity-=gravity*2;
+        if(this.obstacleBubble[i].x<this.obstacleBubble[i].xOrigin-5 || this.obstacleBubble[i].x>this.obstacleBubble[i].xOrigin+5){
+          this.obstacleBubble[i].xValocity*= -1;
+        }
+        this.bubbleGlueCheck(this.obstacleBubble[i]);
+      }
+    }
+  },
+  obstacleBubbleDraw: function(){
+    for(var i=0; i<100; i++){
+      if(this.obstacleBubble[i]!==undefined){
+        ctx.drawImage(this.spriteSheet, this.bubbles[this.obstacleBubble[i].num].sx, this.bubbles[this.obstacleBubble[i].num].sy, this.bubbles.width, this.bubbles.height, this.obstacleBubble[i].x-16, this.obstacleBubble[i].y-16, this.bubbles.width, this.bubbles.height);
+      }
+    }
+  },
+  lineAdder: function(){
+    var x=76+16;
+    var y=15+16;
+    var xPosOffset=0;
+    for(var i=this.bubbleData.length-1; i>0; i--){
+      this.bubbleData[i]=this.bubbleData[i-1];
+      var offset = this.gapOffset(i);
+      for(var j=0;j<this.numOfColumn+offset;j++){
+        this.bubbleData[i][j].y=y+i*28;
+      }
+    }
+    this.bubbleData[0]={};
+    if(this.bubbleData[1].isGap){
+      this.bubbleData[0].isGap=false;
+    } else{
+      this.bubbleData[0].isGap=true;
+      xPosOffset=16;
+    }
+    for(var j=0; j<this.numOfColumn+this.gapOffset(0); j++){
+      this.bubbleData[0][j]={};
+      if(j==13 && this.bubbleData[0].isGap){
+        this.bubbleData[0][j].num=null;
+      } else {
+        this.bubbleData[0][j].num=Math.floor(Math.random()*this.bubbles.numberOfColor)*3;
+      }
+      this.bubbleData[0][j].obstacleChecked=false;
+      this.bubbleData[0][j].isFalling=false;
+      this.bubbleData[0][j].x=x+j*32+xPosOffset;
+      this.bubbleData[0][j].y=y+i*28;
+    }
+    this.gameOverCheck();
+  },
+  shake:{
+    status: false,
+    offset: 0,
+    count: undefined,
+    power: undefined,
+    duration: undefined,
+    COUNT_MAX: 100
+  },
+  shakeGene: function(power, speed, duration){
+    this.shake.status = true;
+    this.shake.offset = 0;
+    this.shake.power = power;
+    this.shake.speed = speed;
+    this.shake.duration = duration;
+    this.shake.count = 100;
+  },
+  shakeUpdate: function(){
+    if(this.shake.count>0){
+      this.shake.count--;
+    } else {
+      this.shake.count = this.shake.COUNT_MAX;
+    }
+    if(this.shake.count>100-this.shake.duration && this.shake.count%this.shake.speed === 0){
+      this.shake.offset=(this.shake.offset==this.shake.power)?(-this.shake.power):(this.shake.power);
+    } else {
+      this.shake.offset=0;
+    }
+  },
+  gameOverCheck: function(){
+    var lastRow=bubble.bubbleData.length-1;
+      var offset=this.gapOffset(lastRow);
+    switch(this.gameMode){
+      case "battleMode":
+        var isP1Lose=false, isP2Lose=false;
+        for(var j=0; j<this.numOfColumn+offset; j++){
+          if(this.bubbleData[lastRow][j].num !== null){
+            if(j<7+offset){
+              isP1Lose=true;
+            }else if(j>6){
+              isP2Lose=true;
+            }
+          }
+        }
+        if(isP1Lose&&isP2Lose){
+          this.gameOverGene("Draw!");
+        }else if(isP1Lose){
+          this.gameOverGene("Player 2 Win!");
+        }else if(isP2Lose){
+          this.gameOverGene("Player 1 Win!");
+        }
+        break;
+      case "singleMode":
+        for(var j=0; j<this.numOfColumn+offset; j++){
+          if(this.bubbleData[lastRow][j].num !== null){
+          this.gameOverGene(this.single.player.score);
+          }
+        }
+        break;
+    }
+  },
+  gameOver:{
+    count:undefined,
+    COUNT_MAX:100,
+    status:undefined,
+    result:{
+      status:undefined,
+      string:undefined,
+      x:300,
+      y:150,
+      size: undefined,
+      transparent: undefined,
+    },
+    headLine:{
+      string: "GAME OVER",
+      x: 300,
+      y: 100,
+      size: undefined
+    }
+  },
+  gameOverGene: function(str){
+    this.gameOver.status = true;
+    this.gameOver.result.status = false;
+    this.gameOver.result.size = 0;
+    this.gameOver.result.string = str;
+    this.gameOver.headLine.size = 0;
+    this.gameOver.count = 0;
+    if(this.gameMode=="singleMode"){
+      postInfo("bubble/saveScore.php",name,this.single.player.score);
+    }
+  },
+  gameOverUpdate: function(){
+    if(this.gameOver.count<this.gameOver.COUNT_MAX){
+      this.gameOver.count++;
+      this.gameOver.headLine.size=20+this.gameOver.count*0.3;
+    }
+    if(this.gameOver.count>29 && this.gameOver.count<81){
+      if(this.gameOver.count<61){
+        this.gameOver.result.transparent=1-(60-this.gameOver.count)/30;
+      }
+      this.gameOver.result.status=true;
+      this.gameOver.result.size=30+this.gameOver.count*0.1;
+    }
+    if(this.gameOver.count ==70){
+      this.click=false;
+      this.menuGene(this.gameMode);
+    }
+  },
+  gameOverDraw: function(){
+    ctx.save();
+		ctx.fillStyle="rgba(0,0,0,0.5)";
+		ctx.fillRect(0,0,WIDTH,HEIGHT);
+		ctx.textAlign="center";
+		ctx.font=this.gameOver.headLine.size+"px Arial";
+    ctx.strokeStyle="rgb(0,0,0)";
+    ctx.lineWidth=5;
+		ctx.strokeText(this.gameOver.headLine.string, this.gameOver.headLine.x, this.gameOver.headLine.y);
+		ctx.fillStyle="rgb(255,255,255)";
+		ctx.fillText(this.gameOver.headLine.string, this.gameOver.headLine.x, this.gameOver.headLine.y);
+    if(this.gameOver.result.status){
+      ctx.font=this.gameOver.result.size+"px Arial";
+      ctx.strokeStyle="rgba(0,0,0,"+this.gameOver.result.transparent+")";
+      ctx.lineWidth=5;
+  		ctx.strokeText(this.gameOver.result.string, this.gameOver.result.x, this.gameOver.result.y);
+      ctx.fillStyle="rgba(255,255,255,"+this.gameOver.result.transparent+")";
+      ctx.fillText(this.gameOver.result.string, this.gameOver.result.x, this.gameOver.result.y);
+    }
+    ctx.restore();
+  },
+	countdown: { //singleMode only
+		string: "",
+		status: false,
+		gap: 40,
+		x: 200,
+		y: 220,
+		stringNum: 0,
+		count: undefined,
+	},
+	countdownGene: function(num){
+		this.countdown.status = true;
+		this.countdown.count = 30;
+		this.countdown.string = num;
+	},
+	countdownUpdate: function(){
+		if(this.countdown.count>0) this.countdown.count--;
+	},
+	countdownDraw: function(){
+		var scaleOffset = (1-(this.countdown.count)/this.countdown.gap)*30+100;
+		var alphaOffset = (1-(this.countdown.count)/this.countdown.gap)*0.5;
+		ctx.save();
+		ctx.textAlign="center";
+		ctx.font = scaleOffset+"px Arial";
+		ctx.fillStyle = "rgba(0,0,0,"+alphaOffset+")";
+		ctx.fillText(this.countdown.string, this.countdown.x, this.countdown.y);
+		ctx.restore();
+	},
+  timer:{ //singleMode only
     string:"TIME :",
     stringX: 360,
     stringY: 40,
@@ -1027,157 +1140,6 @@ var bubble={
 		ctx.fillText(this.timer.timeLeft, this.timer.timeLeftX, this.timer.timeLeftY);
     ctx.restore();
   },
-  singleGene: function(){
-    this.single.status = true;
-    this.countdown.status = false;
-    this.gameMode = "singleMode";
-    this.numOfColumn = 8;
-    this.turnCount = 0;
-    this.shake.status = false;
-    this.gameOver.status = false;
-    this.single.score = 0;
-    this.single.leftButtonToggle = false;
-    this.single.rightButtonToggle = false;
-    this.single.background.num=Math.floor(Math.random()*this.single.background.maxNum);
-    this.single.player.curBubble.num=this.bubbleGenerator();
-    this.single.player.nextBubble.num=this.bubbleGenerator();
-    this.single.player.thirdBubble.num=this.bubbleGenerator();
-    this.single.player.arrow.angle=0;
-    this.single.player.score=0;
-    this.single.bubbleData=new Array(12);
-    for(var i=0;i<this.single.bubbleData.length;i++){
-      this.single.bubbleData[i]={};
-      var gapOffset=0;
-      var xPosOffset=0;
-      if(i%2 === 0){
-        this.single.bubbleData[i].isGap=false;
-      } else {
-        this.single.bubbleData[i].isGap=true;
-        xPosOffset=16;
-      }
-      var x=76+16;
-      var y=15+16;
-      if(i<3){
-        for(var j=0; j<this.numOfColumn; j++){
-          this.single.bubbleData[i][j]={};
-          if(j==13 && this.single.bubbleData[i].isGap){
-            this.single.bubbleData[i][j].num=null;
-          } else {
-            this.single.bubbleData[i][j].num=Math.floor(Math.random()*this.bubbles.numberOfColor)*3;
-          }
-          this.single.bubbleData[i][j].isFalling=false;
-          this.single.bubbleData[i][j].x=x+j*32+xPosOffset;
-          this.single.bubbleData[i][j].y=y+i*28;
-          this.single.bubbleData[i][j].obstacleChecked=false;
-        }
-      } else{
-        for(var j=0; j<this.numOfColumn; j++){
-          this.single.bubbleData[i][j]={};
-          this.single.bubbleData[i][j].num=null;
-          this.single.bubbleData[i][j].isFalling=false;
-          this.single.bubbleData[i][j].x=x+j*32+xPosOffset;
-          this.single.bubbleData[i][j].y=y+i*28;
-          this.single.bubbleData[i][j].obstacleChecked=false;
-        }
-      }
-      this.bubbleData = this.single.bubbleData;
-    }
-    oneHit(KEY_SPACE);
-    this.timerGene();
-  },
-  singleDraw: function(){
-    ctx.save();
-    //black background & gamebBackground & stage frame
-    ctx.fillStyle = "rgba(0,0,0,0.7)";
-    ctx.fillRect(0,0,WIDTH,HEIGHT);
-    ctx.drawImage(this.backgroundSheet, this.single.background[this.single.background.num].sx, this.single.background[this.single.background.num].sy, this.single.background[this.single.background.num].width, this.single.background[this.single.background.num].height, this.single.background[this.single.background.num].x, this.single.background[this.single.background.num].y, this.single.background[this.single.background.num].width*2, this.single.background[this.single.background.num].height*2);
-    ctx.drawImage(this.spriteSheet, this.single.gameFrame.sx, this.single.gameFrame.sy, this.single.gameFrame.width, this.single.gameFrame.height, this.single.gameFrame.x, this.single.gameFrame.y, this.single.gameFrame.width, this.single.gameFrame.height);
-    ctx.drawImage(this.spriteSheet, this.single.luncher.sx, this.single.luncher.sy, this.single.luncher.width, this.single.luncher.height, this.single.luncher.x, this.single.luncher.y, this.single.luncher.width, this.single.luncher.height);
-    //gameBubbles
-    var shakeOffset=0;
-    if(this.shake.status && this.gameOver.status !== true){
-      shakeOffset=this.shake.offset;
-    }
-    for(var i=0;i<this.single.bubbleData.length;i++){
-      var offset = this.gapOffset(i);
-      for(var j=0; j<this.numOfColumn+offset; j++){
-        if(this.single.bubbleData[i][j].num!==null){
-          ctx.drawImage(this.spriteSheet, this.bubbles[this.single.bubbleData[i][j].num].sx, this.bubbles[this.single.bubbleData[i][j].num].sy, this.bubbles.width, this.bubbles.height, this.single.bubbleData[i][j].x-16+shakeOffset, this.single.bubbleData[i][j].y-16, this.bubbles.width, this.bubbles.height);
-        }
-      }
-    }
-    //player arrow & bubbles
-    ctx.save();
-    ctx.translate(this.single.player.arrow.x+8,this.single.player.arrow.y+44);
-    ctx.rotate(this.single.player.arrow.angle*Math.PI/180);
-    ctx.drawImage(this.spriteSheet, this.single.player.arrow.sx, this.single.player.arrow.sy, this.single.player.arrow.width, this.single.player.arrow.height, -8, -44, this.single.player.arrow.width, this.single.player.arrow.height);
-    ctx.restore();
-    if(this.single.player.curBubble.isShow) ctx.drawImage(this.spriteSheet, this.bubbles[this.single.player.curBubble.num].sx, this.bubbles[this.single.player.curBubble.num].sy, this.bubbles.width, this.bubbles.height, this.single.player.curBubble.x-16, this.single.player.curBubble.y-16, this.bubbles.width, this.bubbles.height);
-    ctx.drawImage(this.spriteSheet, this.bubbles[this.single.player.nextBubble.num].sx, this.bubbles[this.single.player.nextBubble.num].sy, this.bubbles.width, this.bubbles.height, this.single.player.nextBubble.x-16, this.single.player.nextBubble.y-16, this.bubbles.width, this.bubbles.height);
-    ctx.drawImage(this.spriteSheet, this.bubbles[this.single.player.thirdBubble.num].sx, this.bubbles[this.single.player.thirdBubble.num].sy, this.bubbles.width, this.bubbles.height, this.single.player.thirdBubble.x-16, this.single.player.thirdBubble.y-16, this.bubbles.width, this.bubbles.height);
-    //score
-		ctx.font="25px Arial";
-    ctx.strokeStyle="rgb(0,0,0)";
-    ctx.lineWidth=5;
-		ctx.fillStyle="rgb(255,255,255)";
-		ctx.textAlign="left";
-    ctx.strokeText("YOUR SCORE", 360, 80);
-		ctx.fillText("YOUR SCORE", 360, 80);
-		ctx.textAlign="right";
-    ctx.strokeText(this.single.player.score, 570, 120);
-		ctx.fillText(this.single.player.score, 570, 120);
-    ctx.restore();
-  },
-  singleUpdate: function(){
-    this.bubbleFallingDraw();
-    this.bubbleFallingUpdate();
-    this.obstacleBubbleDraw();
-    this.obstacleBubbleUpdate();
-    this.timerDraw();
-    if(this.timer.timeLeft<6&&this.timer.timeLeft != this.countdown.string){
-      this.countdownGene(this.timer.timeLeft);
-    }
-    if(this.gameOver.status !== true){
-      this.timerUpdate();
-    }
-    if(this.countdown.status){
-      this.countdownDraw();
-      this.countdownUpdate();
-    }
-    if(this.timer.timeLeft==0 && this.gameOver.status !== true){
-      this.gameOverGene(this.single.player.score);
-    }
-    if(bubble.gameOver.status !== true){
-      this.control(this.single.player);
-    }
-  },
-	countdown: {
-		string: "",
-		status: false,
-		gap: 40,
-		x: 200,
-		y: 220,
-		stringNum: 0,
-		count: undefined,
-	},
-	countdownGene: function(num){
-		this.countdown.status = true;
-		this.countdown.count = 30;
-		this.countdown.string = num;
-	},
-	countdownUpdate: function(){
-		if(this.countdown.count>0) this.countdown.count--;
-	},
-	countdownDraw: function(){
-		var scaleOffset = (1-(this.countdown.count)/this.countdown.gap)*30+100;
-		var alphaOffset = (1-(this.countdown.count)/this.countdown.gap)*0.5;
-		ctx.save();
-		ctx.textAlign="center";
-		ctx.font = scaleOffset+"px Arial";
-		ctx.fillStyle = "rgba(0,0,0,"+alphaOffset+")";
-		ctx.fillText(this.countdown.string, this.countdown.x, this.countdown.y);
-		ctx.restore();
-	},
 	rank:{
 		status:false,
 		scoreDiv: undefined,
@@ -1194,9 +1156,8 @@ var bubble={
 		this.rank.scoreDiv.style.left=canvas.offsetLeft+canvas.offsetWidth*0.1+"px";
 		this.rank.scoreDiv.style.width=canvas.offsetWidth*0.5+"px";
 		this.rank.scoreDiv.style.height=canvas.offsetHeight*0.8+"px";
-  		document.body.appendChild(this.rank.scoreDiv);
-  		this.rank.scoreDiv.innerHTML="<br>Loading.. It may take 3~5 seconds.";
-
+  	document.body.appendChild(this.rank.scoreDiv);
+  	this.rank.scoreDiv.innerHTML="<br>Loading.. It may take 3~5 seconds.";
 		this.rank.scoreIframe=document.createElement("iframe");
 		this.rank.scoreIframe.src="bubble/listScore.php"
 		this.rank.scoreIframe.style.position="absolute";
@@ -1204,8 +1165,7 @@ var bubble={
 		this.rank.scoreIframe.style.left=canvas.offsetLeft+canvas.offsetWidth*0.1+"px";
 		this.rank.scoreIframe.style.width=canvas.offsetWidth*0.5+"px";
 		this.rank.scoreIframe.style.height=canvas.offsetHeight*0.8+"px";
-
-  		document.body.appendChild(this.rank.scoreIframe);
+  	document.body.appendChild(this.rank.scoreIframe);
 	},
 	rankUpdate: function(){
 		if(this.isRectClick(this.rank.menu.x,this.rank.menu.y-this.rank.menu.height,this.rank.menu.width,this.rank.menu.height)){
@@ -1227,7 +1187,40 @@ var bubble={
 		ctx.fillText(this.rank.menu.string, this.rank.menu.x, this.rank.menu.y);
 		ctx.restore();
 	},
+  gapOffset: function(lineNum){
+    var offset=0;
+    if (this.bubbleData[lineNum].isGap){
+      offset= -1;
+    }
+    return offset;
+  },
+  getAroundPosInfo: function(yOrigin,xOrigin){
+    var around={
+      0:{y:yOrigin, x:xOrigin-1},
+      3:{y:yOrigin, x:xOrigin+1},
+      };
+
+    if(this.bubbleData[yOrigin].isGap){
+      around[1]={y:yOrigin-1, x:xOrigin};
+      around[2]={y:yOrigin-1, x:xOrigin+1};
+      around[4]={y:yOrigin+1, x:xOrigin+1};
+      around[5]={y:yOrigin+1, x:xOrigin};
+    } else {
+      around[1]={y:yOrigin-1, x:xOrigin-1};
+      around[2]={y:yOrigin-1, x:xOrigin};
+      around[4]={y:yOrigin+1, x:xOrigin};
+      around[5]={y:yOrigin+1, x:xOrigin-1};
+    }
+    return around;
+  },
+	isRectClick: function(x,y,width,height){
+		if(this.click && mouse.x>x && mouse.y>y && mouse.x<x+width && mouse.y<y+height){
+			this.click = false;
+			return true;
+		}
+	},
 };
+
 var bubbleGame =  new Thing("src/things.png", 600, 250, 98, 98, null, 70);
 bubble.spriteSheet = new Image();
 bubble.spriteSheet.src = "bubble/bubble.png";
